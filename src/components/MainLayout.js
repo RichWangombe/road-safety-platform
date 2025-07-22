@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import { 
   Box, Drawer, CssBaseline, Divider, IconButton, List, ListItem, 
-  ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography
+  ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, ListSubheader
 } from '@mui/material';
 import {
   ChevronLeft, ChevronRight, Menu, Dashboard, Groups, 
@@ -32,23 +32,23 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
 
 const menuItems = [
   // Core Navigation
-  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard', roles: ['all'] },
-  { text: 'Task Board', icon: <ViewKanban />, path: '/board', roles: ['all'] },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard', roles: ['all'], group: 'Core' },
+  { text: 'Task Board', icon: <ViewKanban />, path: '/board', roles: ['all'], group: 'Core' },
   
   // Management Section
-  { text: 'Programs', icon: <Assignment />, path: '/programs', roles: ['manager', 'supervisor'] },
-  { text: 'Roles & Permissions', icon: <AdminPanelSettings />, path: '/roles', roles: ['manager'] },
-  { text: 'Team Members', icon: <People />, path: '/team-members', roles: ['manager', 'supervisor'] },
-  { text: 'Road Safety Actors', icon: <Groups />, path: '/road-safety-actors', roles: ['manager'] },
-  { text: 'Stakeholders', icon: <Handshake />, path: '/stakeholders', roles: ['manager'] },
+  { text: 'Programs', icon: <Assignment />, path: '/programs', roles: ['manager', 'supervisor'], group: 'Management' },
+  { text: 'Roles & Permissions', icon: <AdminPanelSettings />, path: '/roles', roles: ['manager'], group: 'Management' },
+  { text: 'Team Members', icon: <People />, path: '/team-members', roles: ['manager', 'supervisor'], group: 'Management' },
+  { text: 'Road Safety Actors', icon: <Groups />, path: '/road-safety-actors', roles: ['manager'], group: 'Management' },
+  { text: 'Stakeholders', icon: <Handshake />, path: '/stakeholders', roles: ['manager'], group: 'Management' },
   
   // Reporting & Resources
-  { text: 'Reporting', icon: <Report />, path: '/reporting', roles: ['supervisor', 'team-lead'] },
-  { text: 'Resource Centre', icon: <LibraryBooks />, path: '/resource-centre', roles: ['all'] },
+  { text: 'Reporting', icon: <Report />, path: '/reporting', roles: ['supervisor', 'team-lead'], group: 'Operations' },
+  { text: 'Resource Centre', icon: <LibraryBooks />, path: '/resource-centre', roles: ['all'], group: 'Operations' },
   
   // User & System
-  { text: 'Settings', icon: <Settings />, path: '/settings', roles: ['all'] },
-  { text: 'Help & Support', icon: <Help />, path: '/help', roles: ['all'] },
+  { text: 'Settings', icon: <Settings />, path: '/settings', roles: ['all'], group: 'System' },
+  { text: 'Help & Support', icon: <Help />, path: '/help', roles: ['all'], group: 'System' },
 ];
 
 export default function MainLayout({ children }) {
@@ -65,6 +65,16 @@ export default function MainLayout({ children }) {
   const filteredMenuItems = menuItems.filter(item => 
     item.roles.includes('all') || item.roles.includes(userRole)
   );
+
+  // Group the filtered menu items by their 'group' property
+  const groupedMenuItems = filteredMenuItems.reduce((acc, item) => {
+    const group = item.group || 'Other';
+    if (!acc[group]) {
+      acc[group] = [];
+    }
+    acc[group].push(item);
+    return acc;
+  }, {});
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -92,21 +102,27 @@ export default function MainLayout({ children }) {
         <Divider />
         
         <List>
-          {filteredMenuItems.map((item) => (
-            <ListItem 
-              key={item.text} 
-              disablePadding
-              sx={{ 
-                backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'inherit'
-              }}
-            >
-              <ListItemButton component={Link} to={item.path}>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
+          {Object.entries(groupedMenuItems).map(([groupName, items]) => (
+            <div key={groupName}>
+              <ListSubheader>{groupName}</ListSubheader>
+              {items.map((item) => (
+                <ListItem 
+                  key={item.text} 
+                  disablePadding
+                  sx={{ 
+                    backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'inherit'
+                  }}
+                >
+                  <ListItemButton component={Link} to={item.path}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={item.text} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+              <Divider sx={{ my: 1 }} />
+            </div>
           ))}
         </List>
       </Drawer>

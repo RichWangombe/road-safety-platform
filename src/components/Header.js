@@ -9,13 +9,16 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Box
+  Box,
+  Divider
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
   Search as SearchIcon, 
   AccountCircle as AccountCircleIcon
 } from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
+import { menuItems } from './MainLayout'; // Import menuItems to get page titles
 
 const StyledAppBar = styled(AppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -36,16 +39,20 @@ const StyledAppBar = styled(AppBar, {
 
 const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const isMenuOpen = Boolean(anchorEl);
+  const location = useLocation();
+  const openMenu = Boolean(anchorEl);
+
+  // Find the current page title from menuItems
+  const currentPage = menuItems.find(item => item.path === location.pathname);
+
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
+  const isMenuOpen = Boolean(anchorEl);
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -71,7 +78,7 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
 
   return (
     <>
-      <StyledAppBar position="fixed" open={open}>
+      <StyledAppBar position="fixed" open={open} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -84,7 +91,7 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
           </IconButton>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Road Safety Management
+            {currentPage ? currentPage.text : 'Road Safety Management'}
           </Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -102,17 +109,38 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
               sx={{ minWidth: 200 }}
             />
             
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircleIcon />
-            </IconButton>
+            <div>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenuOpen}
+                color="inherit"
+              >
+                <AccountCircleIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={openMenu}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+                <Divider />
+                <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+              </Menu>
+            </div>
           </Box>
         </Toolbar>
       </StyledAppBar>
