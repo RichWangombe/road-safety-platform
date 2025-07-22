@@ -1,4 +1,6 @@
 import React from 'react';
+import { programsData } from './ProgramsPage';
+import { tasksData, activitiesData } from '../data/mockData';
 import {
   Box,
   Typography,
@@ -19,10 +21,8 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
   Line,
-  ComposedChart,
-  Area
+  ComposedChart
 } from 'recharts';
 import {
   Assessment,
@@ -31,45 +31,63 @@ import {
   CheckCircleOutline
 } from '@mui/icons-material';
 
-// Mock Data
-const monthlyTaskData = [
-  { name: 'Jan', completed: 65, overdue: 10 },
-  { name: 'Feb', completed: 59, overdue: 12 },
-  { name: 'Mar', completed: 80, overdue: 5 },
-  { name: 'Apr', completed: 81, overdue: 8 },
-  { name: 'May', completed: 56, overdue: 15 },
-  { name: 'Jun', completed: 55, overdue: 7 },
-  { name: 'Jul', completed: 40, overdue: 9 },
-];
 
-const budgetAllocationData = [
-  { name: 'Public Awareness Campaigns', value: 400000 },
-  { name: 'Infrastructure Improvement', value: 300000 },
-  { name: 'Training & Education', value: 200000 },
-  { name: 'Enforcement Support', value: 100000 },
-];
+
+const budgetAllocationData = programsData.map(program => ({
+  name: program.name,
+  value: program.budget
+}));
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const teamPerformanceData = [
-    { name: 'Week 1', teamA: 40, teamB: 24, teamC: 35 },
-    { name: 'Week 2', teamA: 30, teamB: 13, teamC: 45 },
-    { name: 'Week 3', teamA: 20, teamB: 98, teamC: 55 },
-    { name: 'Week 4', teamA: 27, teamB: 39, teamC: 25 },
-    { name: 'Week 5', teamA: 18, teamB: 48, teamC: 60 },
-];
 
-const activityIncidentData = [
-    { month: 'Jan', activities: 120, incidents: 34 },
-    { month: 'Feb', activities: 150, incidents: 30 },
-    { month: 'Mar', activities: 180, incidents: 25 },
-    { month: 'Apr', activities: 160, incidents: 22 },
-    { month: 'May', activities: 200, incidents: 18 },
-    { month: 'Jun', activities: 220, incidents: 15 },
-];
+
+
 
 
 export default function ReportingPage() {
+  // Generate data for Activity vs. Tasks chart
+  const activityVsTasksData = Array.from({ length: 12 }, (_, i) => ({
+    month: new Date(0, i).toLocaleString('default', { month: 'short' }),
+    activities: 0,
+    tasks: 0,
+  }));
+
+  activitiesData.forEach(activity => {
+    // Assuming ID is a timestamp for creation date
+    const monthIndex = new Date(activity.id).getMonth();
+    if (activityVsTasksData[monthIndex]) {
+      activityVsTasksData[monthIndex].activities++;
+    }
+  });
+
+  tasksData.forEach(task => {
+    const monthIndex = new Date(task.id).getMonth();
+    if (activityVsTasksData[monthIndex]) {
+      activityVsTasksData[monthIndex].tasks++;
+    }
+  });
+
+  // Generate data for monthly task chart
+  const monthlyTaskData = Array.from({ length: 12 }, (_, i) => {
+    const month = new Date(0, i).toLocaleString('default', { month: 'short' });
+    return { name: month, completed: 0, overdue: 0 };
+  });
+
+  tasksData.forEach(task => {
+    const monthIndex = new Date(task.dueDate).getMonth();
+    if (task.status === 'completed') {
+      monthlyTaskData[monthIndex].completed++;
+    } else if (new Date(task.dueDate) < new Date()) {
+      monthlyTaskData[monthIndex].overdue++;
+    }
+  });
+
+  const totalPrograms = programsData.length;
+  const completedTasks = tasksData.filter(task => task.status === 'completed').length;
+  const totalBudget = programsData.reduce((acc, program) => acc + program.budget, 0);
+  const kpiAchievement = tasksData.length > 0 ? Math.round((completedTasks / tasksData.length) * 100) : 0;
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" fontWeight={600} sx={{ mb: 3 }}>
@@ -82,7 +100,7 @@ export default function ReportingPage() {
                 <CardContent>
                     <Assessment sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                     <Typography variant="h6">Total Programs</Typography>
-                    <Typography variant="h4" fontWeight={600}>12</Typography>
+                    <Typography variant="h4" fontWeight={600}>{totalPrograms}</Typography>
                 </CardContent>
             </Card>
         </Grid>
@@ -91,7 +109,7 @@ export default function ReportingPage() {
                 <CardContent>
                     <CheckCircleOutline sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
                     <Typography variant="h6">Tasks Completed</Typography>
-                    <Typography variant="h4" fontWeight={600}>1,245</Typography>
+                    <Typography variant="h4" fontWeight={600}>{completedTasks.toLocaleString()}</Typography>
                 </CardContent>
             </Card>
         </Grid>
@@ -100,7 +118,7 @@ export default function ReportingPage() {
                 <CardContent>
                     <AccountBalanceWallet sx={{ fontSize: 40, color: 'secondary.main', mb: 1 }} />
                     <Typography variant="h6">Total Budget</Typography>
-                    <Typography variant="h4" fontWeight={600}>$1M</Typography>
+                    <Typography variant="h4" fontWeight={600}>${(totalBudget / 1000000).toFixed(1)}M</Typography>
                 </CardContent>
             </Card>
         </Grid>
@@ -109,7 +127,7 @@ export default function ReportingPage() {
                 <CardContent>
                     <TrendingUp sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
                     <Typography variant="h6">KPI Achievement</Typography>
-                    <Typography variant="h4" fontWeight={600}>82%</Typography>
+                    <Typography variant="h4" fontWeight={600}>{kpiAchievement}%</Typography>
                 </CardContent>
             </Card>
         </Grid>
@@ -146,6 +164,7 @@ export default function ReportingPage() {
                   fill="#8884d8"
                   dataKey="value"
                   nameKey="name"
+                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                 >
                   {budgetAllocationData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -157,35 +176,19 @@ export default function ReportingPage() {
             </ResponsiveContainer>
           </Paper>
         </Grid>
-        <Grid item xs={12} lg={6}>
+        
+        <Grid item xs={12} lg={8}>
           <Paper sx={{ p: 2, height: 300, mt: 3 }}>
-            <Typography variant="h6" gutterBottom>Team Performance Over Time</Typography>
+            <Typography variant="h6" gutterBottom>Activities vs. Tasks Created per Month</Typography>
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={teamPerformanceData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="teamA" stroke="#8884d8" name="Team Alpha" />
-                    <Line type="monotone" dataKey="teamB" stroke="#82ca9d" name="Team Bravo" />
-                    <Line type="monotone" dataKey="teamC" stroke="#ffc658" name="Team Charlie" />
-                </LineChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 2, height: 300, mt: 3 }}>
-            <Typography variant="h6" gutterBottom>Activity vs. Incidents</Typography>
-            <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={activityIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+                <ComposedChart data={activityVsTasksData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="activities" fill="#8884d8" stroke="#8884d8" name="Safety Activities" />
-                    <Line type="monotone" dataKey="incidents" stroke="#ff7300" name="Road Incidents" />
+                    <Bar dataKey="activities" fill="#8884d8" name="New Activities" />
+                    <Line type="monotone" dataKey="tasks" stroke="#ff7300" name="New Tasks" />
                 </ComposedChart>
             </ResponsiveContainer>
           </Paper>

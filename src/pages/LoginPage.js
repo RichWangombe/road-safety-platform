@@ -1,59 +1,77 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Box, Button, TextField, Typography, Container, Paper, Alert } from '@mui/material';
 
-export default function LoginPage() {
-  const [step, setStep] = useState(1);
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [otp, setOtp] = useState('');
+const LoginPage = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogin = () => {
-    // TODO: call api.login(credentials) then step 2
-    setStep(2);
-  };
+  const from = location.state?.from?.pathname || '/';
 
-  const handleVerifyOtp = () => {
-    // TODO: call api.verifyOtp(otp) and redirect on success
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    try {
+      const loggedIn = await auth.login(username, password);
+      if (loggedIn) {
+        navigate(from, { replace: true });
+      } else {
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
-    <Box sx={{ maxWidth: 400, mx: 'auto', mt: 8 }}>
-      {step === 1 ? (
-        <>
-          <Typography variant="h5" mb={2}>Login</Typography>
+    <Container component="main" maxWidth="xs">
+      <Paper elevation={3} sx={{ mt: 8, p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h5">
+          NTSA Platform Sign In
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
           <TextField
-            fullWidth
-            label="Username"
-            value={credentials.username}
-            onChange={e => setCredentials({ ...credentials, username: e.target.value })}
             margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
+            margin="normal"
+            required
             fullWidth
+            name="password"
             label="Password"
             type="password"
-            value={credentials.password}
-            onChange={e => setCredentials({ ...credentials, password: e.target.value })}
-            margin="normal"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleLogin}>
-            Next
-          </Button>
-        </>
-      ) : (
-        <>
-          <Typography variant="h5" mb={2}>Enter OTP</Typography>
-          <TextField
+          <Button
+            type="submit"
             fullWidth
-            label="OTP Code"
-            value={otp}
-            onChange={e => setOtp(e.target.value)}
-            margin="normal"
-          />
-          <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleVerifyOtp}>
-            Verify
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign In
           </Button>
-        </>
-      )}
-    </Box>
+        </Box>
+      </Paper>
+    </Container>
   );
-}
+};
+
+export default LoginPage;

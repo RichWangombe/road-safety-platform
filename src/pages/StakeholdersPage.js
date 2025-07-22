@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { stakeholdersData } from '../data/mockData';
 import {
   Box,
   Typography,
@@ -32,63 +33,7 @@ import {
   School
 } from '@mui/icons-material';
 
-// Mock Data
-const mockStakeholders = [
-  {
-    id: 1,
-    name: 'Hon. John Smith',
-    organization: 'Ministry of Transport',
-    role: 'Minister',
-    engagementLevel: 'High',
-    email: 'j.smith@mot.gov',
-    icon: <AccountBalance color="primary" />
-  },
-  {
-    id: 2,
-    name: 'Dr. Emily White',
-    organization: 'National Medical Center',
-    role: 'Head of Emergency Services',
-    engagementLevel: 'Medium',
-    email: 'e.white@nmc.org',
-    icon: <LocalHospital color="error" />
-  },
-  {
-    id: 3,
-    name: 'Mr. David Chen',
-    organization: 'Logistics Corp',
-    role: 'CEO',
-    engagementLevel: 'Low',
-    email: 'd.chen@logisticscorp.com',
-    icon: <CorporateFare color="action" />
-  },
-  {
-    id: 4,
-    name: 'Mrs. Sarah Adams',
-    organization: 'Metropolis School District',
-    role: 'Superintendent',
-    engagementLevel: 'High',
-    email: 's.adams@msd.edu',
-    icon: <School color="secondary" />
-  },
-  {
-    id: 5,
-    name: 'Chief Inspector Davis',
-    organization: 'Regional Police Department',
-    role: 'Traffic Division Chief',
-    engagementLevel: 'High',
-    email: 'davis.t@rpd.gov',
-    icon: <AccountBalance color="primary" />
-  },
-  {
-    id: 6,
-    name: 'Ms. Linda Green',
-    organization: 'Green Future NGO',
-    role: 'Director',
-    engagementLevel: 'Medium',
-    email: 'l.green@greenfuture.org',
-    icon: <CorporateFare color="action" />
-  }
-];
+
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Stakeholder' },
@@ -131,6 +76,20 @@ function EnhancedTableHead(props) {
     </TableHead>
   );
 }
+
+const getIconForStakeholder = (organization) => {
+  const org = organization.toLowerCase();
+  if (org.includes('ministry') || org.includes('police')) {
+    return <AccountBalance color="primary" />;
+  }
+  if (org.includes('hospital') || org.includes('medical')) {
+    return <LocalHospital color="error" />;
+  }
+  if (org.includes('school')) {
+    return <School color="secondary" />;
+  }
+  return <CorporateFare color="action" />;
+};
 
 const getEngagementChip = (level) => {
     switch (level) {
@@ -184,12 +143,13 @@ export default function StakeholdersPage() {
     setSelectedStakeholder(null);
   };
 
-  const filteredStakeholders = useMemo(() =>
-    mockStakeholders.filter(s =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.role.toLowerCase().includes(searchQuery.toLowerCase())
-    ), [searchQuery]);
+    const filteredStakeholders = useMemo(() => {
+    return stakeholdersData.filter(stakeholder => 
+      stakeholder.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stakeholder.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stakeholder.role.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   const sortedAndPagedStakeholders = useMemo(() => {
     const sorted = [...filteredStakeholders].sort((a, b) => {
@@ -201,7 +161,7 @@ export default function StakeholdersPage() {
     return sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [filteredStakeholders, order, orderBy, page, rowsPerPage]);
 
-  const highEngagementCount = useMemo(() => mockStakeholders.filter(s => s.engagementLevel === 'High').length, []);
+    const highEngagementCount = useMemo(() => stakeholdersData.filter(s => s.engagementLevel === 'High').length, []);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -212,7 +172,7 @@ export default function StakeholdersPage() {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6}>
-            <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{mockStakeholders.length}</Typography></CardContent></Card>
+            <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{stakeholdersData.length}</Typography></CardContent></Card>
         </Grid>
         <Grid item xs={12} sm={6}>
             <Card><CardContent><Typography variant="h6">High-Engagement</Typography><Typography variant="h4">{highEngagementCount}</Typography></CardContent></Card>
@@ -246,7 +206,7 @@ export default function StakeholdersPage() {
                 <TableRow hover key={stakeholder.id}>
                   <TableCell component="th" scope="row" padding="none">
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{stakeholder.icon}</Avatar>
+                      <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{getIconForStakeholder(stakeholder.organization)}</Avatar>
                       <Box>
                         <Typography variant="subtitle2">{stakeholder.name}</Typography>
                         <Typography variant="body2" color="text.secondary">{stakeholder.email}</Typography>

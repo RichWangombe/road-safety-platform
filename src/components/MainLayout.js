@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { styled, useTheme } from '@mui/material/styles';
 import { 
   Box, Drawer, CssBaseline, Divider, IconButton, List, ListItem, 
@@ -52,18 +53,16 @@ export const menuItems = [
 ];
 
 export default function MainLayout({ children }) {
+  const { user } = useAuth();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const location = useLocation();
   
-  // Mock user role - replace with real auth later
-  const userRole = 'team-lead'; 
-
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
   const filteredMenuItems = menuItems.filter(item => 
-    item.roles.includes('all') || item.roles.includes(userRole)
+    item.roles.includes('all') || item.roles.includes(user.role)
   );
 
   // Group the filtered menu items by their 'group' property

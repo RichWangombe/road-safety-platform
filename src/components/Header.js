@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { styled } from '@mui/material/styles';
 import {
   AppBar,
@@ -38,6 +39,7 @@ const StyledAppBar = styled(AppBar, {
 }));
 
 const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const location = useLocation();
   const openMenu = Boolean(anchorEl);
@@ -53,28 +55,7 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
   };
 
   const isMenuOpen = Boolean(anchorEl);
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Sign out</MenuItem>
-    </Menu>
-  );
+
 
   return (
     <>
@@ -138,14 +119,13 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
                 <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
                 <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
                 <Divider />
-                <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+                <MenuItem onClick={logout}>Logout</MenuItem>
               </Menu>
             </div>
           </Box>
         </Toolbar>
       </StyledAppBar>
-      
-      {renderMenu}
+
     </>
   );
 };

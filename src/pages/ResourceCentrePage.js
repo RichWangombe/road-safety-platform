@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { resourcesData } from '../data/mockData';
 import {
   Box,
   Typography,
@@ -23,63 +24,7 @@ import {
   Book as GuideIcon
 } from '@mui/icons-material';
 
-// Mock Data
-const mockResources = [
-  {
-    id: 1,
-    title: 'National Road Safety Strategy 2021-2030',
-    description: 'The official government strategy document outlining key objectives and action plans.',
-    category: 'Official Documents',
-    type: 'PDF',
-    dateAdded: '2023-01-15',
-    icon: <PdfIcon color="error" />
-  },
-  {
-    id: 2,
-    title: 'Defensive Driving Techniques',
-    description: 'A comprehensive video tutorial on best practices for defensive driving.',
-    category: 'Training Materials',
-    type: 'Video',
-    dateAdded: '2023-02-20',
-    icon: <VideoIcon color="secondary" />
-  },
-  {
-    id: 3,
-    title: 'Incident Reporting Form',
-    description: 'Standard template for reporting road safety incidents. Please download and fill.',
-    category: 'Forms & Templates',
-    type: 'DOC',
-    dateAdded: '2023-03-10',
-    icon: <DocIcon color="primary" />
-  },
-  {
-    id: 4,
-    title: 'Guide to School Zone Safety Audits',
-    description: 'A step-by-step guide for conducting safety audits in school zones.',
-    category: 'Guidelines',
-    type: 'Guide',
-    dateAdded: '2023-04-05',
-    icon: <GuideIcon sx={{ color: '#FFC107' }} />
-  },
-  {
-    id: 5,
-    title: 'Annual Performance Report 2022',
-    description: 'A detailed report on the performance and outcomes of all road safety programs in 2022.',
-    category: 'Official Documents',
-    type: 'PDF',
-    dateAdded: '2023-05-25',
-    icon: <PdfIcon color="error" />
-  },
-  {
-    id: 6,
-    title: 'Community Engagement Toolkit',
-    description: 'Resources and templates for running effective community engagement sessions.',
-    category: 'Guidelines',
-    type: 'DOC',
-    dateAdded: '2023-06-18',
-    icon: <DocIcon color="primary" />
-  }
-];
+
 
 const categories = ['All', 'Official Documents', 'Training Materials', 'Forms & Templates', 'Guidelines'];
 
@@ -95,8 +40,23 @@ export default function ResourceCentrePage() {
     setSearchQuery(event.target.value);
   };
 
+    const getIconForType = (type) => {
+    switch (type) {
+      case 'PDF':
+        return <PdfIcon color="error" />;
+      case 'Video':
+        return <VideoIcon color="secondary" />;
+      case 'DOC':
+        return <DocIcon color="primary" />;
+      case 'Guide':
+        return <GuideIcon sx={{ color: '#FFC107' }} />;
+      default:
+        return <DocIcon />;
+    }
+  };
+
   const filteredResources = useMemo(() => {
-    return mockResources.filter(resource => {
+    return resourcesData.filter(resource => {
       const matchesCategory = selectedCategory === 'All' || resource.category === selectedCategory;
       const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             resource.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -145,7 +105,7 @@ export default function ResourceCentrePage() {
             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  {resource.icon}
+                  {getIconForType(resource.type)}
                   <Typography variant="h6" component="div" sx={{ ml: 2 }}>
                     {resource.title}
                   </Typography>

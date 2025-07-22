@@ -1,4 +1,6 @@
 import React from 'react';
+import { programsData } from './ProgramsPage';
+import { activitiesData, tasksData } from '../data/mockData';
 import {
   Box,
   Typography,
@@ -26,86 +28,13 @@ import {
   LocationOn
 } from '@mui/icons-material';
 
-// Mock dashboard data
-const dashboardStats = {
-  totalPrograms: 12,
-  activePrograms: 8,
-  completedTasks: 156,
-  totalTasks: 203,
-  totalBudget: 8750000,
-  activeUsers: 45,
-  overdueTasks: 7,
-  upcomingDeadlines: 12
-};
 
-const recentActivities = [
-  {
-    id: 1,
-    type: 'task_completed',
-    title: 'Highway inspection completed',
-    user: 'John Smith',
-    time: '2 hours ago',
-    priority: 'high'
-  },
-  {
-    id: 2,
-    type: 'program_created',
-    title: 'New traffic management program created',
-    user: 'Sarah Johnson',
-    time: '4 hours ago',
-    priority: 'medium'
-  },
-  {
-    id: 3,
-    type: 'task_overdue',
-    title: 'Road maintenance task overdue',
-    user: 'Mike Davis',
-    time: '6 hours ago',
-    priority: 'high'
-  },
-  {
-    id: 4,
-    type: 'report_submitted',
-    title: 'Monthly safety report submitted',
-    user: 'Lisa Chen',
-    time: '1 day ago',
-    priority: 'low'
-  }
-];
 
-const programProgress = [
-  { name: 'Highway Safety Initiative', progress: 75, status: 'active' },
-  { name: 'Urban Traffic Management', progress: 60, status: 'active' },
-  { name: 'Rural Road Maintenance', progress: 15, status: 'planning' },
-  { name: 'Driver Education Campaign', progress: 100, status: 'completed' }
-];
 
-const upcomingTasks = [
-  {
-    id: 1,
-    title: 'Traffic light installation',
-    dueDate: '2025-07-20',
-    assignee: 'John Smith',
-    priority: 'high',
-    program: 'Urban Traffic Management'
-  },
-  {
-    id: 2,
-    title: 'Safety audit report',
-    dueDate: '2025-07-22',
-    assignee: 'Sarah Johnson',
-    priority: 'medium',
-    program: 'Highway Safety Initiative'
-  },
-  {
-    id: 3,
-    title: 'Equipment maintenance',
-    dueDate: '2025-07-25',
-    assignee: 'Mike Davis',
-    priority: 'low',
-    program: 'Rural Road Maintenance'
-  }
-];
+
+
+
+
 
 const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (
   <Card sx={{ height: '100%' }}>
@@ -157,7 +86,81 @@ const getPriorityColor = (priority) => {
 };
 
 export default function DashboardPage() {
-  const taskCompletionRate = Math.round((dashboardStats.completedTasks / dashboardStats.totalTasks) * 100);
+  // Generate a dynamic feed of recent activities (approximated)
+  const allItems = [
+    ...programsData.map(p => ({ ...p, type: 'program_created', priority: p.priority || 'medium' })),
+    ...activitiesData.map(a => ({ ...a, type: 'activity_created', priority: a.priority || 'medium' })),
+    ...tasksData.map(t => ({ ...t, type: 'task_created', priority: 'low' })) // Tasks don't have priority, so we assign one
+  ];
+
+  const recentActivities = allItems
+    .sort((a, b) => b.id - a.id) // Sort by ID descending to get the newest items
+    .slice(0, 5) // Get the top 5 newest items
+    .map(item => ({
+      id: item.id,
+      type: item.type,
+      title: item.name,
+      user: item.assignedTo || 'System', // Use assignedTo for tasks, otherwise 'System'
+      time: 'Just now', // Placeholder time
+      priority: item.priority
+    }));
+
+  // Generate dynamic upcoming tasks
+  const upcomingTasks = tasksData
+    .filter(task => task.status !== 'completed')
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .slice(0, 3)
+    .map(task => {
+      const activity = activitiesData.find(a => a.id === task.activityId);
+      const program = activity ? programsData.find(p => p.id === activity.programId) : null;
+      return {
+        ...task,
+        program: program ? program.name : 'Unknown Program'
+      };
+    });
+
+  // Generate dynamic program progress
+  const programProgress = programsData.map(program => {
+    const programActivities = activitiesData.filter(a => a.programId === program.id);
+    const activityIds = programActivities.map(a => a.id);
+    const programTasks = tasksData.filter(t => activityIds.includes(t.activityId));
+    const completedTasks = programTasks.filter(t => t.status === 'completed').length;
+    const totalTasks = programTasks.length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    return {
+      name: program.name,
+      progress,
+      status: program.status
+    };
+  });
+  // Calculate dynamic stats
+  const totalPrograms = programsData.length;
+  const activePrograms = programsData.filter(p => p.status === 'active').length;
+  const totalTasks = tasksData.length;
+  const completedTasks = tasksData.filter(t => t.status === 'completed').length;
+  const totalBudget = programsData.reduce((sum, p) => sum + p.budget, 0);
+  const overdueTasks = tasksData.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length;
+  // Let's define upcoming as due in the next 7 days
+  const upcomingDeadlines = tasksData.filter(t => {
+    const dueDate = new Date(t.dueDate);
+    const today = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+    return dueDate > today && dueDate <= nextWeek && t.status !== 'completed';
+  }).length;
+
+  const dashboardStats = {
+    totalPrograms,
+    activePrograms,
+    completedTasks,
+    totalTasks,
+    totalBudget,
+    activeUsers: 45, // This remains static for now
+    overdueTasks,
+    upcomingDeadlines
+  };
+  const taskCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   
   return (
     <Box sx={{ p: 3 }}>

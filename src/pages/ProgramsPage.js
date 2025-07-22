@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import ProgramForm from '../components/ProgramForm';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 import {
   Box,
   Typography,
@@ -37,7 +41,7 @@ import {
 } from '@mui/icons-material';
 
 // Mock data for programs
-const programsData = [
+export const programsData = [
   {
     id: 1,
     name: 'Highway Safety Initiative',
@@ -100,7 +104,7 @@ const programsData = [
   },
 ];
 
-const getStatusColor = (status) => {
+export const getStatusColor = (status) => {
   switch (status) {
     case 'active': return { bg: '#e8f5e8', color: '#2e7d32' };
     case 'planning': return { bg: '#fff3e0', color: '#f57c00' };
@@ -110,7 +114,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const getPriorityColor = (priority) => {
+export const getPriorityColor = (priority) => {
   switch (priority) {
     case 'high': return { bg: '#ffebee', color: '#d32f2f' };
     case 'medium': return { bg: '#fff3e0', color: '#f57c00' };
@@ -120,7 +124,15 @@ const getPriorityColor = (priority) => {
 };
 
 export default function ProgramsPage() {
-  const [programs] = useState(programsData);
+  const { user } = useAuth();
+  const canManagePrograms = user?.role === 'Program Manager';
+  const navigate = useNavigate();
+  const [programs, setPrograms] = useState(programsData);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProgram, setEditingProgram] = useState(null);
+  const [programToDelete, setProgramToDelete] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [orderBy, setOrderBy] = useState('name');
@@ -143,6 +155,25 @@ export default function ProgramsPage() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedProgram(null);
+  };
+
+  const handleFormSave = (programData) => {
+    if (editingProgram) {
+      // Update existing program
+      setPrograms(programs.map(p => p.id === programData.id ? programData : p));
+    } else {
+      // Create new program
+      const newProgram = { ...programData, id: Date.now(), progress: 0, tasks: 0, completedTasks: 0, manager: { name: 'Unassigned' } };
+      setPrograms([...programs, newProgram]);
+    }
+    setEditingProgram(null);
+    setIsFormOpen(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    setPrograms(programs.filter(p => p.id !== programToDelete.id));
+    setIsConfirmOpen(false);
+    setProgramToDelete(null);
   };
 
   const filteredPrograms = programs.filter(program =>
@@ -170,13 +201,18 @@ export default function ProgramsPage() {
         <Typography variant="h4" fontWeight={600}>
           Programs Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          sx={{ borderRadius: 2 }}
-        >
-          New Program
-        </Button>
+        {canManagePrograms && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setEditingProgram(null);
+              setIsFormOpen(true);
+            }}
+          >
+            Create Program
+          </Button>
+        )}
       </Box>
 
       {/* Stats Cards */}
@@ -391,19 +427,47 @@ export default function ProgramsPage() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={() => {
+          navigate(`/program/${selectedProgram.id}`);
+          handleMenuClose();
+        }}>
           <Visibility fontSize="small" sx={{ mr: 1 }} />
           View Details
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <Edit fontSize="small" sx={{ mr: 1 }} />
-          Edit Program
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <Delete fontSize="small" sx={{ mr: 1 }} />
-          Delete Program
-        </MenuItem>
+        {canManagePrograms && [
+          <MenuItem key="edit" onClick={() => {
+            setEditingProgram(selectedProgram);
+            setIsFormOpen(true);
+            handleMenuClose();
+          }}>
+            <Edit sx={{ mr: 1 }} />
+            Edit
+          </MenuItem>,
+          <MenuItem key="delete" onClick={() => {
+            setProgramToDelete(selectedProgram);
+            setIsConfirmOpen(true);
+            handleMenuClose();
+          }}>
+            <Delete sx={{ mr: 1 }} />
+            Delete
+          </MenuItem>
+        ]}
       </Menu>
+
+      <ProgramForm 
+        open={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSave={handleFormSave}
+        program={editingProgram}
+      />
+
+      <ConfirmationDialog
+        open={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Program"
+        message={`Are you sure you want to delete the program "${programToDelete?.name}"? This action cannot be undone.`}
+      />
     </Box>
   );
 }
