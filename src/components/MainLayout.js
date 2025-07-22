@@ -30,7 +30,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
   }),
 }));
 
-const menuItems = [
+export const menuItems = [
   // Core Navigation
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard', roles: ['all'], group: 'Core' },
   { text: 'Task Board', icon: <ViewKanban />, path: '/board', roles: ['all'], group: 'Core' },
