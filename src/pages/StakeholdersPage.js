@@ -171,10 +171,10 @@ export default function StakeholdersPage() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6}>
+        <Grid xs={12} sm={6}>
             <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{stakeholdersData.length}</Typography></CardContent></Card>
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid xs={12} sm={6}>
             <Card><CardContent><Typography variant="h6">High-Engagement</Typography><Typography variant="h4">{highEngagementCount}</Typography></CardContent></Card>
         </Grid>
       </Grid>
@@ -217,7 +217,7 @@ export default function StakeholdersPage() {
                   <TableCell>{stakeholder.role}</TableCell>
                   <TableCell>{getEngagementChip(stakeholder.engagementLevel)}</TableCell>
                   <TableCell>
-                    <IconButton onClick={(e) => handleMenuClick(e, stakeholder)}>
+                    <IconButton data-testid={`action-menu-button-${stakeholder.id}`} onClick={(e) => handleMenuClick(e, stakeholder)}>
                       <MoreVertIcon />
                     </IconButton>
                   </TableCell>

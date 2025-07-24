@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 // This is a mock function. In a real app, you'd make an API call.
 const mockAuth = async (username, password) => {

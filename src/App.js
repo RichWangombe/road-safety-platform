@@ -21,31 +21,24 @@ import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <ThemeProvider theme={ntsaTheme}>
-      <CssBaseline />
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="programs" element={<ProgramsPage />} />
-              <Route path="program/:programId" element={<ProgramDetailPage />} />
-              <Route path="activity/:activityId" element={<ActivityDetailPage />} />
-              <Route path="roles" element={<RolesPage />} />
-              <Route path="team-members" element={<TeamMembersPage />} />
-              <Route path="road-safety-actors" element={<RoadSafetyActorsPage />} />
-              <Route path="reporting" element={<ReportingPage />} />
-              <Route path="resource-centre" element={<ResourceCentrePage />} />
-              <Route path="stakeholders" element={<StakeholdersPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="help" element={<HelpPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="programs" element={<ProgramsPage />} />
+        <Route path="program/:programId" element={<ProgramDetailPage />} />
+        <Route path="activity/:activityId" element={<ActivityDetailPage />} />
+        <Route path="roles" element={<RolesPage />} />
+        <Route path="team-members" element={<TeamMembersPage />} />
+        <Route path="road-safety-actors" element={<RoadSafetyActorsPage />} />
+        <Route path="reporting" element={<ReportingPage />} />
+        <Route path="resource-centre" element={<ResourceCentrePage />} />
+        <Route path="stakeholders" element={<StakeholdersPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="help" element={<HelpPage />} />
+      </Route>
+    </Routes>
   );
 }
 

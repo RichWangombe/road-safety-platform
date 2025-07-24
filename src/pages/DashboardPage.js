@@ -385,7 +385,7 @@ export default function DashboardPage() {
                           Due: {new Date(task.dueDate).toLocaleDateString()}
                         </Typography>
                         <Avatar sx={{ width: 24, height: 24, fontSize: '0.7rem' }}>
-                          {task.assignee.charAt(0)}
+                          {(task.assignee || '?').charAt(0)}
                         </Avatar>
                       </Box>
                     </CardContent>

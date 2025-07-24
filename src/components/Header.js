@@ -39,7 +39,7 @@ const StyledAppBar = styled(AppBar, {
 }));
 
 const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const location = useLocation();
   const openMenu = Boolean(anchorEl);
@@ -49,14 +49,6 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
-
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const isMenuOpen = Boolean(anchorEl);
-
-
   return (
     <>
       <StyledAppBar position="fixed" open={open} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>

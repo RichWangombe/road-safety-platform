@@ -22,9 +22,11 @@ describe('App Routing', () => {
 
     render(
       <MemoryRouter initialEntries={['/']}>
-        <AuthContext.Provider value={{ user: mockUser, login: () => {}, logout: () => {} }}>
-          <App />
-        </AuthContext.Provider>
+        <AuthProvider>
+          <AuthContext.Provider value={{ user: mockUser, login: () => {}, logout: () => {} }}>
+            <App />
+          </AuthContext.Provider>
+        </AuthProvider>
       </MemoryRouter>
     );
 
