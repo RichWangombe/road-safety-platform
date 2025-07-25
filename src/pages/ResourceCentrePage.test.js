@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { AuthProvider } from '../context/AuthContext';
@@ -41,11 +41,18 @@ describe('ResourceCentrePage', () => {
     expect(screen.getByText('Accident Report Form')).toBeInTheDocument();
   });
 
-  it('filters resources by category', () => {
+  it('filters resources by category', async () => {
     renderWithProviders(<ResourceCentrePage />);
-    fireEvent.click(screen.getByText('Training Materials'));
-    expect(screen.queryByText('Road Safety Manual')).not.toBeInTheDocument();
-    expect(screen.getByText('Driver Training Video')).toBeInTheDocument();
+    
+    // Wait for tabs to be rendered
+    const trainingTab = await screen.findByRole('tab', { name: /training materials/i });
+    fireEvent.click(trainingTab);
+
+    // Wait for filtering to complete
+    await waitFor(() => {
+      expect(screen.queryByText('Road Safety Manual')).not.toBeInTheDocument();
+      expect(screen.getByText('Driver Training Video')).toBeInTheDocument();
+    });
   });
 
   it('filters resources by search query', () => {

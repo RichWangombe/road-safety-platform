@@ -334,6 +334,7 @@ export default function DashboardPage() {
                           />
                         </Box>
                       }
+                      secondaryTypographyProps={{ component: 'div' }}
                       secondary={
                         <Box>
                           <Typography variant="caption" color="text.secondary">

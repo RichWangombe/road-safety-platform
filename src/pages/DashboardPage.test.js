@@ -34,7 +34,7 @@ describe('DashboardPage', () => {
 
     // Check for Stat Cards (summary cards)
     expect(screen.getByText(/Total Programs/i)).toBeInTheDocument();
-    expect(screen.getByText(/Total Tasks/i)).toBeInTheDocument();
+    expect(screen.getByText(/Task Completion/i)).toBeInTheDocument();
 
     // Check for other sections
     expect(screen.getByText(/Program Progress/i)).toBeInTheDocument();

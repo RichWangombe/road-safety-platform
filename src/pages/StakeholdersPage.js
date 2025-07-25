@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { stakeholdersData } from '../data/mockData';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   Box,
   Typography,
@@ -32,14 +32,13 @@ import {
   LocalHospital, 
   School
 } from '@mui/icons-material';
-
-
+import { fetchStakeholders } from '../api/apiService';
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Stakeholder' },
-  { id: 'organization', numeric: false, disablePadding: false, label: 'Organization' },
-  { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
-  { id: 'engagementLevel', numeric: false, disablePadding: false, label: 'Engagement' },
+  { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
+  { id: 'contact_person', numeric: false, disablePadding: false, label: 'Contact Person' },
+  { id: 'engagement_level', numeric: false, disablePadding: false, label: 'Engagement' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'Actions' },
 ];
 
@@ -92,19 +91,17 @@ const getIconForStakeholder = (organization) => {
 };
 
 const getEngagementChip = (level) => {
-    switch (level) {
-        case 'High':
-            return <Chip label="High" color="success" size="small" variant="filled" />;
-        case 'Medium':
-            return <Chip label="Medium" color="warning" size="small" variant="filled" />;
-        case 'Low':
-            return <Chip label="Low" color="default" size="small" variant="outlined" />;
-        default:
-            return <Chip label={level} size="small" />;
-    }
+  const levelMap = {
+    'High': { label: 'High', color: 'success' },
+    'Medium': { label: 'Medium', color: 'warning' },
+    'Low': { label: 'Low', color: 'error' },
+  };
+  const { label, color } = levelMap[level] || { label: level, color: 'default' };
+  return <Chip label={label} color={color} size="small" />;
 };
 
 export default function StakeholdersPage() {
+  const { user } = useAuth();
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
   const [page, setPage] = useState(0);
@@ -112,6 +109,28 @@ export default function StakeholdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStakeholder, setSelectedStakeholder] = useState(null);
+  const [stakeholders, setStakeholders] = useState([]);
+  const [filteredStakeholders, setFilteredStakeholders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadStakeholders = async () => {
+      try {
+        setError(null); // Reset error state before making request
+        setLoading(true);
+        const data = await fetchStakeholders(user.token);
+        setStakeholders(data);
+        setFilteredStakeholders(data);
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    loadStakeholders();
+  }, []);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -143,25 +162,25 @@ export default function StakeholdersPage() {
     setSelectedStakeholder(null);
   };
 
-    const filteredStakeholders = useMemo(() => {
-    return stakeholdersData.filter(stakeholder => 
-      stakeholder.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stakeholder.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stakeholder.role.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
-
   const sortedAndPagedStakeholders = useMemo(() => {
-    const sorted = [...filteredStakeholders].sort((a, b) => {
+    const filtered = stakeholders.filter((stakeholder) =>
+      Object.values(stakeholder).some(value =>
+        String(value).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+    const sorted = [...filtered].sort((a, b) => {
         const isAsc = order === 'asc';
         return isAsc
             ? a[orderBy].localeCompare(b[orderBy])
             : b[orderBy].localeCompare(a[orderBy]);
     });
     return sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [filteredStakeholders, order, orderBy, page, rowsPerPage]);
+  }, [stakeholders, order, orderBy, page, rowsPerPage, searchQuery]);
 
-    const highEngagementCount = useMemo(() => stakeholdersData.filter(s => s.engagementLevel === 'High').length, []);
+  const highEngagementCount = useMemo(() => stakeholders.filter(s => s.engagement_level === 'High').length, [stakeholders]);
+
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography>Error: {error}</Typography>;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -172,10 +191,10 @@ export default function StakeholdersPage() {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid xs={12} sm={6}>
-            <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{stakeholdersData.length}</Typography></CardContent></Card>
+          <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{stakeholders.length}</Typography></CardContent></Card>
         </Grid>
         <Grid xs={12} sm={6}>
-            <Card><CardContent><Typography variant="h6">High-Engagement</Typography><Typography variant="h4">{highEngagementCount}</Typography></CardContent></Card>
+          <Card><CardContent><Typography variant="h6">High-Engagement</Typography><Typography variant="h4">{highEngagementCount}</Typography></CardContent></Card>
         </Grid>
       </Grid>
 
@@ -206,16 +225,16 @@ export default function StakeholdersPage() {
                 <TableRow hover key={stakeholder.id}>
                   <TableCell component="th" scope="row" padding="none">
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{getIconForStakeholder(stakeholder.organization)}</Avatar>
+                                            <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{getIconForStakeholder(stakeholder.type)}</Avatar>
                       <Box>
                         <Typography variant="subtitle2">{stakeholder.name}</Typography>
                         <Typography variant="body2" color="text.secondary">{stakeholder.email}</Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell>{stakeholder.organization}</TableCell>
-                  <TableCell>{stakeholder.role}</TableCell>
-                  <TableCell>{getEngagementChip(stakeholder.engagementLevel)}</TableCell>
+                                    <TableCell>{stakeholder.type}</TableCell>
+                  <TableCell>{stakeholder.contact_person}</TableCell>
+                  <TableCell>{getEngagementChip(stakeholder.engagement_level)}</TableCell>
                   <TableCell>
                     <IconButton data-testid={`action-menu-button-${stakeholder.id}`} onClick={(e) => handleMenuClick(e, stakeholder)}>
                       <MoreVertIcon />
@@ -250,4 +269,3 @@ export default function StakeholdersPage() {
     </Box>
   );
 }
-
