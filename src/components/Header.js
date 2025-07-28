@@ -19,7 +19,7 @@ import {
   AccountCircle as AccountCircleIcon
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-import { menuItems } from './MainLayout'; // Import menuItems to get page titles
+import { menuItems } from './menuItems'; // Import menuItems to get page titles
 
 const StyledAppBar = styled(AppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -39,13 +39,23 @@ const StyledAppBar = styled(AppBar, {
 }));
 
 const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const isAuthenticated = !!user;
   const [anchorEl, setAnchorEl] = useState(null);
-  const location = useLocation();
+  const location = useLocation(); // Always available within Router
+
   const openMenu = Boolean(anchorEl);
 
-  // Find the current page title from menuItems
-  const currentPage = menuItems.find(item => item.path === location.pathname);
+  // Determine page title
+  const currentPage = location ? menuItems?.find(item => location.pathname.startsWith(item.path)) : null;
+  let pageTitle = 'Road Safety Management';
+  if (currentPage) {
+    pageTitle = currentPage.text;
+  } else if (location && location.pathname !== '/') {
+    const segment = location.pathname.split('/')[1] || '';
+    pageTitle = segment.replace(/-/g, ' ');
+    pageTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
+  }
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -64,7 +74,7 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
           </IconButton>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {currentPage ? currentPage.text : 'Road Safety Management'}
+            {pageTitle}
           </Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -83,16 +93,18 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
             />
             
             <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenuOpen}
-                color="inherit"
-              >
-                <AccountCircleIcon />
-              </IconButton>
+              {isAuthenticated && (
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenuOpen}
+                  color="inherit"
+                >
+                  <AccountCircleIcon data-testid="AccountCircleIcon" />
+                </IconButton>
+              )}
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}

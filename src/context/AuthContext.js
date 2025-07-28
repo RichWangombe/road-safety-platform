@@ -2,32 +2,29 @@ import React, { createContext, useState, useContext } from 'react';
 
 export const AuthContext = createContext(null);
 
-// This is a mock function. In a real app, you'd make an API call.
-const mockAuth = async (username, password) => {
-  // In a real app, you'd validate credentials against a backend.
-  if (username === 'manager' && password === 'password') {
-    return { id: 1, name: 'Program Manager', email: 'manager@ntsa.go.ke', role: 'manager' };
-  }
-  if (username === 'supervisor' && password === 'password') {
-    return { id: 2, name: 'Regional Supervisor', email: 'supervisor@ntsa.go.ke', role: 'supervisor' };
-  }
-  if (username === 'lead' && password === 'password') {
-    return { id: 3, name: 'Team Lead A', email: 'lead@ntsa.go.ke', role: 'team-lead' };
-  }
-  return null;
-};
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  const login = async (username, password) => {
-    const userData = await mockAuth(username, password);
-    if (userData) {
-      setUser(userData);
-      // In a real app, you might store a token in localStorage
-      return true;
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-    return false;
   };
 
   const logout = () => {

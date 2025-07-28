@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\StakeholderController;
+use App\Http\Controllers\Api\V1\ProgramController;
+use App\Http\Controllers\Api\V1\ActivityController;
+use App\Http\Controllers\Api\V1\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +27,6 @@ Route::get('/status', function () {
 });
 
 Route::apiResource('v1/stakeholders', StakeholderController::class);
+Route::apiResource('v1/programs', ProgramController::class);
+Route::apiResource('v1/activities', ActivityController::class);
+Route::apiResource('v1/tasks', TaskController::class);

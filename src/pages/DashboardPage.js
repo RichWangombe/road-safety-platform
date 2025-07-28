@@ -1,6 +1,5 @@
-import React from 'react';
-import { programsData } from './ProgramsPage';
-import { activitiesData, tasksData } from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { fetchPrograms, fetchStakeholders, fetchTasks } from '../api/apiService';
 import {
   Box,
   Typography,
@@ -27,14 +26,6 @@ import {
   AttachMoney,
   LocationOn
 } from '@mui/icons-material';
-
-
-
-
-
-
-
-
 
 const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (
   <Card sx={{ height: '100%' }}>
@@ -86,11 +77,44 @@ const getPriorityColor = (priority) => {
 };
 
 export default function DashboardPage() {
+  const [programs, setPrograms] = useState([]);
+  const [stakeholders, setStakeholders] = useState([]);
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [programsData, stakeholdersData, tasksData] = await Promise.all([
+          fetchPrograms(),
+          fetchStakeholders(),
+          fetchTasks(),
+        ]);
+        setPrograms(programsData);
+        setStakeholders(stakeholdersData);
+        setTasks(tasksData);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleTestAPI = async () => {
+    try {
+      const token = localStorage.getItem('token'); // We'll implement token storage later
+      const data = await fetchStakeholders(token);
+      setStakeholders(data);
+      console.log('Stakeholders:', data);
+    } catch (error) {
+      console.error('API Error:', error);
+    }
+  };
+
   // Generate a dynamic feed of recent activities (approximated)
   const allItems = [
-    ...programsData.map(p => ({ ...p, type: 'program_created', priority: p.priority || 'medium' })),
-    ...activitiesData.map(a => ({ ...a, type: 'activity_created', priority: a.priority || 'medium' })),
-    ...tasksData.map(t => ({ ...t, type: 'task_created', priority: 'low' })) // Tasks don't have priority, so we assign one
+    ...programs.map(p => ({ ...p, type: 'program_created', priority: p.priority || 'medium' })),
+    ...tasks.map(t => ({ ...t, type: 'task_created', priority: 'low' })) // Tasks don't have priority, so we assign one
   ];
 
   const recentActivities = allItems
@@ -106,13 +130,12 @@ export default function DashboardPage() {
     }));
 
   // Generate dynamic upcoming tasks
-  const upcomingTasks = tasksData
+  const upcomingTasks = tasks
     .filter(task => task.status !== 'completed')
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
     .slice(0, 3)
     .map(task => {
-      const activity = activitiesData.find(a => a.id === task.activityId);
-      const program = activity ? programsData.find(p => p.id === activity.programId) : null;
+      const program = programs.find(p => p.id === task.programId);
       return {
         ...task,
         program: program ? program.name : 'Unknown Program'
@@ -120,10 +143,8 @@ export default function DashboardPage() {
     });
 
   // Generate dynamic program progress
-  const programProgress = programsData.map(program => {
-    const programActivities = activitiesData.filter(a => a.programId === program.id);
-    const activityIds = programActivities.map(a => a.id);
-    const programTasks = tasksData.filter(t => activityIds.includes(t.activityId));
+  const programProgress = programs.map(program => {
+    const programTasks = tasks.filter(t => t.programId === program.id);
     const completedTasks = programTasks.filter(t => t.status === 'completed').length;
     const totalTasks = programTasks.length;
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -135,14 +156,14 @@ export default function DashboardPage() {
     };
   });
   // Calculate dynamic stats
-  const totalPrograms = programsData.length;
-  const activePrograms = programsData.filter(p => p.status === 'active').length;
-  const totalTasks = tasksData.length;
-  const completedTasks = tasksData.filter(t => t.status === 'completed').length;
-  const totalBudget = programsData.reduce((sum, p) => sum + p.budget, 0);
-  const overdueTasks = tasksData.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length;
+  const totalPrograms = programs.length;
+  const activePrograms = programs.filter(p => p.status === 'active').length;
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
+  const totalBudget = programs.reduce((sum, p) => sum + p.budget, 0);
+  const overdueTasks = tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length;
   // Let's define upcoming as due in the next 7 days
-  const upcomingDeadlines = tasksData.filter(t => {
+  const upcomingDeadlines = tasks.filter(t => {
     const dueDate = new Date(t.dueDate);
     const today = new Date();
     const nextWeek = new Date();
@@ -173,8 +194,8 @@ export default function DashboardPage() {
       </Typography>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12 }}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard
             title="Total Programs"
             value={dashboardStats.totalPrograms}
@@ -183,7 +204,7 @@ export default function DashboardPage() {
             subtitle={`${dashboardStats.activePrograms} active`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard
             title="Task Completion"
             value={`${taskCompletionRate}%`}
@@ -192,7 +213,7 @@ export default function DashboardPage() {
             subtitle={`${dashboardStats.completedTasks}/${dashboardStats.totalTasks} tasks`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard
             title="Total Budget"
             value={`$${(dashboardStats.totalBudget / 1000000).toFixed(1)}M`}
@@ -201,7 +222,7 @@ export default function DashboardPage() {
             subtitle="Across all programs"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard
             title="Active Users"
             value={dashboardStats.activeUsers}
@@ -213,8 +234,8 @@ export default function DashboardPage() {
       </Grid>
 
       {/* Alert Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6}>
+      <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12 }}>
+        <Grid xs={12} sm={6} md={6}>
           <Card sx={{ bgcolor: '#fff3e0', borderLeft: '4px solid #ff9800' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -231,7 +252,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid xs={12} sm={6} md={6}>
           <Card sx={{ bgcolor: '#e3f2fd', borderLeft: '4px solid #2196f3' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -251,16 +272,16 @@ export default function DashboardPage() {
       </Grid>
 
       {/* Main Content Grid */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12 }}>
         {/* Program Progress */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={8}>
           <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Program Progress
             </Typography>
             <Box sx={{ mt: 2 }}>
               {programProgress.map((program, index) => (
-                <Box key={index} sx={{ mb: 3 }}>
+                <Box key={`program-${program.name}-${index}`} sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2" fontWeight={500}>
                       {program.name}
@@ -304,14 +325,14 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Recent Activities */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={4}>
           <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Recent Activities
             </Typography>
             <List sx={{ mt: 1 }}>
               {recentActivities.map((activity, index) => (
-                <React.Fragment key={activity.id}>
+                <React.Fragment key={`activity-${activity.id}-${index}`}>
                   <ListItem alignItems="flex-start" sx={{ px: 0 }}>
                     <ListItemAvatar>
                       <Avatar sx={{ bgcolor: 'transparent' }}>
@@ -355,14 +376,14 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Upcoming Tasks */}
-        <Grid item xs={12}>
+        <Grid xs={12} md={12}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Upcoming Tasks
             </Typography>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              {upcomingTasks.map((task) => (
-                <Grid item xs={12} sm={6} md={4} key={task.id}>
+            <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12 }}>
+              {upcomingTasks.map((task, index) => (
+                <Grid key={`task-${task.id}-${index}`} xs={12} sm={6} md={4}>
                   <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -397,6 +418,8 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
       </Grid>
+      <button onClick={handleTestAPI}>Test API Connection</button>
+      <pre>{JSON.stringify(stakeholders, null, 2)}</pre>
     </Box>
   );
 }

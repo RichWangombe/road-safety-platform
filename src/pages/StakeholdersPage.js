@@ -189,7 +189,7 @@ export default function StakeholdersPage() {
         <Button variant="contained" startIcon={<AddIcon />}>Add New Stakeholder</Button>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      <Grid container spacing={3} sx={{ mb: 3 }} columns={{ xs: 12, sm: 12 }}>
         <Grid xs={12} sm={6}>
           <Card><CardContent><Typography variant="h6">Total Stakeholders</Typography><Typography variant="h4">{stakeholders.length}</Typography></CardContent></Card>
         </Grid>
@@ -221,18 +221,18 @@ export default function StakeholdersPage() {
               onRequestSort={handleRequestSort}
             />
             <TableBody>
-              {sortedAndPagedStakeholders.map((stakeholder) => (
-                <TableRow hover key={stakeholder.id}>
+              {sortedAndPagedStakeholders.map((stakeholder, index) => (
+                <TableRow hover key={`${stakeholder.id}-${stakeholder.name}`}>
                   <TableCell component="th" scope="row" padding="none">
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{getIconForStakeholder(stakeholder.type)}</Avatar>
+                      <Avatar sx={{ mr: 2, bgcolor: 'transparent' }}>{getIconForStakeholder(stakeholder.type)}</Avatar>
                       <Box>
                         <Typography variant="subtitle2">{stakeholder.name}</Typography>
                         <Typography variant="body2" color="text.secondary">{stakeholder.email}</Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                                    <TableCell>{stakeholder.type}</TableCell>
+                  <TableCell>{stakeholder.type}</TableCell>
                   <TableCell>{stakeholder.contact_person}</TableCell>
                   <TableCell>{getEngagementChip(stakeholder.engagement_level)}</TableCell>
                   <TableCell>

@@ -18,7 +18,7 @@ jest.mock('../data/mockData', () => ({
 
 const renderWithProviders = (ui) => {
   return render(
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ThemeProvider theme={ntsaTheme}>
         <AuthProvider value={{ user: { role: 'Program Manager' } }}>{ui}</AuthProvider>
       </ThemeProvider>

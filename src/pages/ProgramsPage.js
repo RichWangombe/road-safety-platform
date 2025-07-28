@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ProgramForm from '../components/ProgramForm';
@@ -39,6 +39,7 @@ import {
   FilterList,
   GetApp
 } from '@mui/icons-material';
+import { fetchPrograms } from '../api/apiService';
 
 // Mock data for programs
 export const programsData = [
@@ -127,7 +128,7 @@ export default function ProgramsPage() {
   const { user } = useAuth();
   const canManagePrograms = user?.role === 'Program Manager';
   const navigate = useNavigate();
-  const [programs, setPrograms] = useState(programsData);
+  const [programs, setPrograms] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [programToDelete, setProgramToDelete] = useState(null);
@@ -140,6 +141,19 @@ export default function ProgramsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
+
+  useEffect(() => {
+    const loadPrograms = async () => {
+      try {
+        const data = await fetchPrograms();
+        setPrograms(data);
+      } catch (error) {
+        console.error('Failed to fetch programs:', error);
+      }
+    };
+
+    loadPrograms();
+  }, []);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';

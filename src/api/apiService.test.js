@@ -1,33 +1,41 @@
+import axios from 'axios';
 import { fetchStakeholders } from './apiService';
 
+// Mock the axios module with a custom factory so that `axios.create()` returns the mocked instance itself.
+jest.mock('axios', () => {
+  const mockAxios = {
+    get: jest.fn(),
+    interceptors: { request: { use: jest.fn() } },
+  };
+  mockAxios.create = jest.fn(() => mockAxios);
+  return mockAxios;
+});
+
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('apiService', () => {
-  beforeEach(() => {
-    global.fetch = jest.fn();
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('fetches stakeholders successfully', async () => {
-    const mockData = [{ id: 1, name: 'Test Stakeholder' }];
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData)
+    // Arrange
+    axios.get.mockResolvedValueOnce({
+      data: [
+        { id: 1, name: 'John Doe', engagement: 5 },
+        { id: 2, name: 'Jane Smith', engagement: 3 },
+      ],
     });
-
-    const result = await fetchStakeholders('test-token');
-    expect(result).toEqual(mockData);
-    expect(fetch).toHaveBeenCalledWith('/api/v1/stakeholders', {
-      headers: { 'Authorization': 'Bearer test-token' }
-    });
+    // Act
+    const stakeholders = await fetchStakeholders();
+    expect(stakeholders).toEqual([
+      { id: 1, name: 'John Doe', engagement: 5 },
+      { id: 2, name: 'Jane Smith', engagement: 3 },
+    ]);
   });
 
-  it('throws error on failed request', async () => {
-    fetch.mockResolvedValueOnce({ ok: false, status: 500 });
-    
-    await expect(fetchStakeholders('test-token'))
-      .rejects
-      .toThrow('Network request failed');
+  it('throws an error on failed request', async () => {
+          axios.get.mockRejectedValueOnce(new Error('Network Error'));
+
+          await expect(fetchStakeholders()).rejects.toThrow('Failed to fetch stakeholders');
   });
 });

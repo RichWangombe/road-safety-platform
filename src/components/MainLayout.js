@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, Menu, Dashboard, Groups, 
   Assignment, People, Report, LibraryBooks, Handshake, ViewKanban, AdminPanelSettings, Settings, Help
 } from '@mui/icons-material';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, Outlet } from 'react-router-dom';
 import Header from './Header';
 
 const drawerWidth = 240;
@@ -31,32 +31,17 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
   }),
 }));
 
-export const menuItems = [
-  // Core Navigation
-  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard', roles: ['all'], group: 'Core' },
-  { text: 'Task Board', icon: <ViewKanban />, path: '/board', roles: ['all'], group: 'Core' },
-  
-  // Management Section
-  { text: 'Programs', icon: <Assignment />, path: '/programs', roles: ['manager', 'supervisor'], group: 'Management' },
-  { text: 'Roles & Permissions', icon: <AdminPanelSettings />, path: '/roles', roles: ['manager'], group: 'Management' },
-  { text: 'Team Members', icon: <People />, path: '/team-members', roles: ['manager', 'supervisor'], group: 'Management' },
-  { text: 'Road Safety Actors', icon: <Groups />, path: '/road-safety-actors', roles: ['manager'], group: 'Management' },
-  { text: 'Stakeholders', icon: <Handshake />, path: '/stakeholders', roles: ['manager'], group: 'Management' },
-  
-  // Reporting & Resources
-  { text: 'Reporting', icon: <Report />, path: '/reporting', roles: ['supervisor', 'team-lead'], group: 'Operations' },
-  { text: 'Resource Centre', icon: <LibraryBooks />, path: '/resource-centre', roles: ['all'], group: 'Operations' },
-  
-  // User & System
-  { text: 'Settings', icon: <Settings />, path: '/settings', roles: ['all'], group: 'System' },
-  { text: 'Help & Support', icon: <Help />, path: '/help', roles: ['all'], group: 'System' },
-];
+import { menuItems } from './menuItems';
 
-export default function MainLayout({ children }) {
-  const { user } = useAuth();
+
+
+export { menuItems };
+
+export default function MainLayout() {
   const theme = useTheme();
+  const { user } = useAuth();
+  const location = useLocation(); 
   const [open, setOpen] = useState(false);
-  const location = useLocation();
   
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -76,7 +61,7 @@ export default function MainLayout({ children }) {
   }, {});
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex' }} data-testid="main-layout">
       <CssBaseline />
       <Header position="fixed" open={open} handleDrawerOpen={handleDrawerOpen} />
       
@@ -109,7 +94,7 @@ export default function MainLayout({ children }) {
                   key={item.text} 
                   disablePadding
                   sx={{ 
-                    backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'inherit'
+                    backgroundColor: location?.pathname === item.path ? theme.palette.action.selected : 'inherit'
                   }}
                 >
                   <ListItemButton component={Link} to={item.path}>
@@ -128,7 +113,7 @@ export default function MainLayout({ children }) {
       
       <Main open={open}>
         <Toolbar />
-        {children}
+        <Outlet />
       </Main>
     </Box>
   );

@@ -9,7 +9,7 @@ const mockStakeholders = [
 
 export const handlers = [
   // Handles a GET /api/v1/stakeholders request
-  rest.get('/api/v1/stakeholders', (req, res, ctx) => {
+  rest.get('http://localhost:3001/api/v1/stakeholders', (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json(mockStakeholders)

@@ -29,7 +29,12 @@ afterEach(() => {
 
 const renderComponent = () => {
   return render(
-    <MemoryRouter>
+    <MemoryRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <ThemeProvider theme={ntsaTheme}>
         <StakeholdersPage />
       </ThemeProvider>
@@ -102,8 +107,43 @@ describe('StakeholdersPage', () => {
     expect(chipRoot).toHaveClass('MuiChip-colorSuccess');
   });
 
-  it.skip('sorts stakeholders from the API by name when header is clicked', () => {
-    // This test is skipped
+  it('sorts stakeholders by name', async () => {
+    renderComponent();
+
+    // Wait for the table to be present
+    const table = await screen.findByRole('table');
+  
+    // Wait for the Stakeholder column header within the table
+    const nameHeader = await within(table).findByRole('columnheader', { name: /Stakeholder/i });
+  
+    // Click to sort ascending
+    fireEvent.click(nameHeader);
+  
+    // Wait for the sorted data
+    const rows = await within(table).findAllByRole('row');
+  
+    // Check the order
+    // Wait for the first row to have the expected text
+    await waitFor(() => {
+      expect(within(rows[1]).getByText('API Jane Smith')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(within(rows[2]).getByText('API John Doe')).toBeInTheDocument();
+    });
+  
+    // Click to sort descending
+    fireEvent.click(nameHeader);
+  
+    // Wait for the sorted data
+    const updatedRows = await within(table).findAllByRole('row');
+  
+    // Check the order
+    await waitFor(() => {
+      expect(within(updatedRows[1]).getByText('API Jane Smith')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(within(updatedRows[2]).getByText('API John Doe')).toBeInTheDocument();
+    });
   });
 
   it('handles pagination correctly with API data', async () => {
