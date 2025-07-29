@@ -1,22 +1,17 @@
-// Placeholder API service for future backend integration
-const API_BASE = process.env.REACT_APP_API_BASE || '';
+// Kanban board service wrapping apiService. Provides column/task CRUD helpers.
+import apiService from "../api/apiService";
 
 export const getColumns = async () => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`${API_BASE}/columns`);
-  // return response.json();
-  return [];
+  const response = await apiService.get("/v1/kanban/columns");
+  return response.data;
 };
 
 export const createTask = async (columnId, task) => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`${API_BASE}/columns/${columnId}/tasks`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(task)
-  // });
-  // return response.json();
-  return task;
+  const response = await apiService.post(
+    `/v1/kanban/columns/${columnId}/tasks`,
+    task,
+  );
+  return response.data;
 };
 
 // More service methods (updateTask, deleteTask) can be added here

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,9 +6,9 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
-  MenuItem
-} from '@mui/material';
+  MenuItem,
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 const TaskForm = ({ open, onClose, onSave, task }) => {
   const [formData, setFormData] = useState(task || {});
@@ -19,7 +19,7 @@ const TaskForm = ({ open, onClose, onSave, task }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
@@ -29,24 +29,24 @@ const TaskForm = ({ open, onClose, onSave, task }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{task ? 'Edit Task' : 'Create New Task'}</DialogTitle>
+      <DialogTitle>{task ? "Edit Task" : "Create New Task"}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               name="name"
               label="Task Name"
-              value={formData.name || ''}
+              value={formData.name || ""}
               onChange={handleChange}
               fullWidth
               required
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="status"
               label="Status"
-              value={formData.status || 'pending'}
+              value={formData.status || "pending"}
               onChange={handleChange}
               fullWidth
               select
@@ -58,21 +58,21 @@ const TaskForm = ({ open, onClose, onSave, task }) => {
               <MenuItem value="cancelled">Cancelled</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="assignedTo"
               label="Assigned To"
-              value={formData.assignedTo || ''}
+              value={formData.assignedTo || ""}
               onChange={handleChange}
               fullWidth
             />
           </Grid>
-           <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               name="dueDate"
               label="Due Date"
               type="date"
-              value={formData.dueDate || ''}
+              value={formData.dueDate || ""}
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -82,7 +82,9 @@ const TaskForm = ({ open, onClose, onSave, task }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">Save</Button>
+        <Button onClick={handleSave} variant="contained">
+          Save
+        </Button>
       </DialogActions>
     </Dialog>
   );

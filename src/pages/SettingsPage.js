@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -9,12 +9,12 @@ import {
   Button,
   Avatar,
   IconButton,
-  Grid,
   FormControlLabel,
   Switch,
-  Divider
-} from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
+  Divider,
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { PhotoCamera } from "@mui/icons-material";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -27,11 +27,7 @@ function TabPanel(props) {
       aria-labelledby={`settings-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -50,7 +46,11 @@ export default function SettingsPage() {
       </Typography>
 
       <Paper>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          aria-label="settings tabs"
+        >
           <Tab label="Profile" />
           <Tab label="Security" />
           <Tab label="Notifications" />
@@ -58,51 +58,103 @@ export default function SettingsPage() {
         <Divider />
 
         <TabPanel value={tabValue} index={0}>
-          <Typography variant="h6" gutterBottom>Profile Information</Typography>
+          <Typography variant="h6" gutterBottom>
+            Profile Information
+          </Typography>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} sm={3} sx={{ textAlign: 'center' }}>
-              <Avatar sx={{ width: 100, height: 100, mx: 'auto', mb: 1 }} />
+            <Grid size={{ xs: 12, sm: 3 }} sx={{ textAlign: "center" }}>
+              <Avatar sx={{ width: 100, height: 100, mx: "auto", mb: 1 }} />
               <Button component="label" startIcon={<PhotoCamera />}>
                 Upload
                 <input type="file" hidden />
               </Button>
             </Grid>
-            <Grid item xs={12} sm={9}>
-              <TextField label="Full Name" defaultValue="John Doe" fullWidth sx={{ mb: 2 }} />
-              <TextField label="Email Address" defaultValue="john.doe@example.com" fullWidth sx={{ mb: 2 }} />
-              <TextField label="Role" defaultValue="Program Manager" fullWidth disabled />
+            <Grid size={{ xs: 12, sm: 9 }}>
+              <TextField
+                label="Full Name"
+                defaultValue="John Doe"
+                fullWidth
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Email Address"
+                defaultValue="john.doe@example.com"
+                fullWidth
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Role"
+                defaultValue="Program Manager"
+                fullWidth
+                disabled
+              />
             </Grid>
-            <Grid item xs={12} sx={{ textAlign: 'right' }}>
-                <Button variant="contained">Save Changes</Button>
+            <Grid size={{ xs: 12 }} sx={{ textAlign: "right" }}>
+              <Button variant="contained">Save Changes</Button>
             </Grid>
           </Grid>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Typography variant="h6" gutterBottom>Change Password</Typography>
+          <Typography variant="h6" gutterBottom>
+            Change Password
+          </Typography>
           <Box sx={{ maxWidth: 500 }}>
-            <TextField label="Current Password" type="password" fullWidth sx={{ mb: 2 }} />
-            <TextField label="New Password" type="password" fullWidth sx={{ mb: 2 }} />
-            <TextField label="Confirm New Password" type="password" fullWidth sx={{ mb: 2 }} />
-            <Box sx={{ textAlign: 'right' }}>
-                <Button variant="contained">Update Password</Button>
+            <TextField
+              label="Current Password"
+              type="password"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="New Password"
+              type="password"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Confirm New Password"
+              type="password"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Box sx={{ textAlign: "right" }}>
+              <Button variant="contained">Update Password</Button>
             </Box>
           </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          <Typography variant="h6" gutterBottom>Notification Settings</Typography>
+          <Typography variant="h6" gutterBottom>
+            Notification Settings
+          </Typography>
           <Box>
-            <Typography variant="subtitle1" sx={{ mt: 2 }}>Email Notifications</Typography>
-            <FormControlLabel control={<Switch defaultChecked />} label="Task Assignments" />
-            <FormControlLabel control={<Switch defaultChecked />} label="Comment Mentions" />
+            <Typography variant="subtitle1" sx={{ mt: 2 }}>
+              Email Notifications
+            </Typography>
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Task Assignments"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Comment Mentions"
+            />
             <FormControlLabel control={<Switch />} label="Weekly Summary" />
             <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle1" sx={{ mt: 2 }}>In-App Notifications</Typography>
-            <FormControlLabel control={<Switch defaultChecked />} label="Task Status Changes" />
-            <FormControlLabel control={<Switch defaultChecked />} label="Upcoming Deadlines" />
-             <Box sx={{ textAlign: 'right', mt: 2 }}>
-                <Button variant="contained">Save Preferences</Button>
+            <Typography variant="subtitle1" sx={{ mt: 2 }}>
+              In-App Notifications
+            </Typography>
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Task Status Changes"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Upcoming Deadlines"
+            />
+            <Box sx={{ textAlign: "right", mt: 2 }}>
+              <Button variant="contained">Save Preferences</Button>
             </Box>
           </Box>
         </TabPanel>

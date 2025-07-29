@@ -11,6 +11,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@mui/system": "^7.2.0",
     "@testing-library/react": "^16.3.0",
     "date-fns": "^4.1.0",
     "fast-text-encoding": "^1.0.6",
@@ -26,6 +27,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false",
+    "lint": "eslint --ext .js,.jsx src",
+    "e2e": "start-server-and-test start http://localhost:3000 cy:run",
+    "cy:run": "cypress run --browser chrome",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -52,9 +56,12 @@
     ]
   },
   "devDependencies": {
+    "cypress": "^13.7.3",
+    "start-server-and-test": "^2.0.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.6.1",
+    "eslint": "^9.25.0",
     "lodash": "^4.17.21",
     "msw": "0.49.2"
   }

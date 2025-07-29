@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchActivities } from '../api/apiService';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchActivities } from "../api/apiService";
 import {
   Box,
   Typography,
@@ -13,7 +13,7 @@ import {
   TableRow,
   Paper,
   Chip,
-} from '@mui/material';
+} from "@mui/material";
 
 export default function ActivitiesPage() {
   const [activities, setActivities] = useState([]);
@@ -25,7 +25,7 @@ export default function ActivitiesPage() {
         const data = await fetchActivities();
         setActivities(data);
       } catch (error) {
-        console.error('Failed to fetch activities:', error);
+        console.error("Failed to fetch activities:", error);
       }
     };
 
@@ -54,11 +54,13 @@ export default function ActivitiesPage() {
             {activities.map((activity) => (
               <TableRow key={activity.id}>
                 <TableCell>{activity.name}</TableCell>
-                <TableCell>{activity.program?.name || 'N/A'}</TableCell>
+                <TableCell>{activity.program?.name || "N/A"}</TableCell>
                 <TableCell>
-                  <Chip 
-                    label={activity.status} 
-                    color={activity.status === 'completed' ? 'success' : 'primary'} 
+                  <Chip
+                    label={activity.status}
+                    color={
+                      activity.status === "completed" ? "success" : "primary"
+                    }
                   />
                 </TableCell>
                 <TableCell>{activity.due_date}</TableCell>
