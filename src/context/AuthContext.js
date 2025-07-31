@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("token", data.token);
       setUser(data.user);
+      return data.user;
     } catch (error) {
       console.error("Login error:", error);
       throw error;

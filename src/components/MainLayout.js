@@ -34,6 +34,7 @@ import {
 } from "@mui/icons-material";
 import { useLocation, Link, Outlet } from "react-router-dom";
 import Header from "./Header";
+import { menuItems } from "./menuItems";
 
 const drawerWidth = 240;
 
@@ -56,7 +57,6 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   }),
 );
 
-import { menuItems } from "./menuItems";
 
 export { menuItems };
 
