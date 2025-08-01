@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            TaskStatusSeeder::class,
             StakeholderSeeder::class,
             ProgramSeeder::class,
         ]);

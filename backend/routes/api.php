@@ -42,3 +42,4 @@ Route::apiResource('v1/stakeholders', StakeholderController::class);
 Route::apiResource('v1/programs', ProgramController::class);
 Route::apiResource('v1/activities', ActivityController::class);
 Route::apiResource('v1/tasks', TaskController::class);
+Route::post('v1/tasks/{task}/move', [TaskController::class, 'move']);
