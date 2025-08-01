@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             StakeholderSeeder::class,
+            ProgramSeeder::class,
         ]);
     }
 }
