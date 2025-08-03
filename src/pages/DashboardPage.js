@@ -84,6 +84,20 @@ const getPriorityColor = (priority) => {
   }
 };
 
+// Safely derive an avatar initial from various possible assignee shapes
+const getAssigneeInitial = (assignee) => {
+  if (!assignee) return "?";
+  if (typeof assignee === "string") return assignee.charAt(0).toUpperCase();
+  if (typeof assignee === "object") {
+    // Try common property names
+    const name = assignee.name || assignee.fullName || assignee.first_name || assignee.firstName;
+    if (typeof name === "string" && name.length) return name.charAt(0).toUpperCase();
+  }
+  // Fallback – stringify to avoid runtime errors but keep UX acceptable
+  return String(assignee).charAt(0).toUpperCase();
+};
+
+
 export default function DashboardPage() {
   const [programs, setPrograms] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -471,7 +485,7 @@ export default function DashboardPage() {
                         <Avatar
                           sx={{ width: 24, height: 24, fontSize: "0.7rem" }}
                         >
-                          {(task.assignee || "?").charAt(0)}
+                          {getAssigneeInitial(task.assignee)}
                         </Avatar>
                       </Box>
                     </CardContent>

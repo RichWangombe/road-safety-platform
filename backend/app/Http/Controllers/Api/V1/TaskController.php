@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,11 +18,11 @@ class TaskController extends Controller
         $query = Task::with(['activity', 'assignee', 'status']);
 
         if ($request->filled('activity_id')) {
-            $query->where('activity_id', $request->integer('activity_id'));
+            $query->where('activity_id', (int) $request->input('activity_id'));
         }
 
         if ($request->filled('status_id')) {
-            $query->where('status_id', $request->integer('status_id'));
+            $query->where('status_id', (int) $request->input('status_id'));
         }
 
         return $query->orderBy('position')->get();
@@ -92,6 +93,8 @@ class TaskController extends Controller
             'status_id' => 'required|exists:task_statuses,id',
             'position'  => 'required|integer|min:0',
         ]);
+
+        $this->authorize('move', $task);
 
         DB::transaction(function () use ($task, $data) {
             // Decrement positions in old column
