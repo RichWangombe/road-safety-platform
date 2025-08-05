@@ -42,4 +42,5 @@ Route::apiResource('v1/stakeholders', StakeholderController::class);
 Route::apiResource('v1/programs', ProgramController::class);
 Route::apiResource('v1/activities', ActivityController::class);
 Route::apiResource('v1/tasks', TaskController::class);
+Route::get('v1/task-statuses', [\App\Http\Controllers\Api\V1\TaskStatusController::class, 'index']);
 Route::post('v1/tasks/{task}/move', [TaskController::class, 'move']);

@@ -16,18 +16,26 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory(10)->create();
 
         // Fixed users
-        \App\Models\User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'role' => 'admin',
-        ]);
-        \App\Models\User::factory()->create([
-            'name' => 'Regular User',
-            'email' => 'user@example.com',
-            'role' => 'team_member',
-        ]);
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'role' => 'admin',
+                'password' => bcrypt('password'),
+            ]
+        );
+        \App\Models\User::updateOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'name' => 'Regular User',
+                'role' => 'team_member',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->call([
+            RegionSeeder::class,
+            DemoUserSeeder::class,
             TaskStatusSeeder::class,
             StakeholderSeeder::class,
             ProgramSeeder::class,

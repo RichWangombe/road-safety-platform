@@ -15,7 +15,8 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Task::with(['activity', 'assignee', 'status']);
+        $user = $request->user();
+        $query = Task::with(['activity', 'assignee', 'status'])->allowed($user);
 
         if ($request->filled('activity_id')) {
             $query->where('activity_id', (int) $request->input('activity_id'));

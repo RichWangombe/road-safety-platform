@@ -4,10 +4,13 @@ import {
   Box,
   Paper,
   Typography,
+  Chip,
+  Stack,
   CircularProgress,
 } from "@mui/material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import apiService from "../api/apiService";
+import useCan from "../hooks/useCan";
 
 // Utility to group tasks into columns keyed by status_id
 const groupByStatus = (tasks) => {
@@ -41,6 +44,7 @@ export default function TaskBoard() {
 
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const canMove = useCan('move');
   const [error, setError] = useState(null);
 
   const loadTasks = useCallback(async () => {
@@ -63,6 +67,7 @@ export default function TaskBoard() {
   }, [loadTasks]);
 
   const handleDragEnd = async (result) => {
+    if (!canMove) return; // no permission to move
     const { destination, source, draggableId } = result;
     if (!destination) return; // dropped outside
 
@@ -139,6 +144,7 @@ export default function TaskBoard() {
                     draggableId={task.id.toString()}
                     index={idx}
                     key={task.id}
+                    isDragDisabled={!canMove}
                   >
                     {(prov, snap) => (
                       <Paper
@@ -148,15 +154,30 @@ export default function TaskBoard() {
                         sx={{
                           p: 1.5,
                           mb: 1,
+                          borderLeft: `6px solid ${task?.status?.color || '#9E9E9E'}`,
                           opacity: snap.isDragging ? 0.7 : 1,
                         }}
                       >
-                        <Typography variant="body1" fontWeight={600}>
+                        <Typography variant="body1" fontWeight={600} noWrap>
                           {task.title}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Priority: {task.priority}
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+                          <Chip size="small" label={task.priority} color={
+                            task.priority === 'high'
+                              ? 'error'
+                              : task.priority === 'medium'
+                              ? 'warning'
+                              : 'default'
+                          } />
+                          {task.due_date && (
+                            <Chip
+                              size="small"
+                              label={new Date(task.due_date).toLocaleDateString()}
+                              color={new Date(task.due_date) < new Date() ? 'error' : 'success'}
+                              variant="outlined"
+                            />
+                          )}
+                        </Stack>
                       </Paper>
                     )}
                   </Draggable>
