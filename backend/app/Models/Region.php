@@ -6,19 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class TaskStatus extends Model
+class Region extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'slug',
-        'position',
-        'color',
     ];
 
-    public function tasks(): HasMany
+    public function users(): HasMany
     {
-        return $this->hasMany(Task::class, 'status_id');
+        return $this->hasMany(User::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
     }
 }

@@ -20,6 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
+        'region_id',
         'password',
     ];
 
@@ -39,6 +41,15 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
+        'role' => 'string',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the region this user belongs to.
+     */
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
 }
