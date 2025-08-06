@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -21,27 +23,28 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if ($data['email'] === 'admin@example.com' && $data['password'] === 'password') {
-            return response()->json([
-                'token' => 'dev-demo-token',
-                'user'  => [
-                    'id'    => 1,
-                    'name'  => 'Admin User',
-                    'email' => 'admin@example.com',
-                    'role'  => 'Admin',
-                ],
-            ])->withHeaders([
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Headers' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-            ]);
+        $user = User::where('email', $data['email'])->first();
+
+        // Verify credentials
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED)
+                ->withHeaders([
+                    'Access-Control-Allow-Origin' => '*',
+                    'Access-Control-Allow-Headers' => '*',
+                    'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+                ]);
         }
 
-        return response()->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED)
-            ->withHeaders([
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Headers' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-            ]);
+        // Create a Sanctum token for the authenticated user
+        $token = $user->createToken('api')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => $user,
+        ])->withHeaders([
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Headers' => '*',
+            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+        ]);
     }
 }

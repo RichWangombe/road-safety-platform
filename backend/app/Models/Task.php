@@ -40,8 +40,13 @@ class Task extends Model
     /**
      * Scope a query to only include tasks the given user is allowed to see.
      */
-    public function scopeAllowed(Builder $query, User $user): Builder
+    public function scopeAllowed(Builder $query, ?User $user = null): Builder
     {
+        // If no user provided (should be protected by auth middleware), return query unmodified to avoid errors.
+        if (!$user) {
+            return $query;
+        }
+
         // Global roles
         if (in_array($user->role, ['admin', 'program_manager'])) {
             return $query;

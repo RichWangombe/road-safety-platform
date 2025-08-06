@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\ProgramController;
 use App\Http\Controllers\Api\V1\ActivityController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\AuthController;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Dev auth login route
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->withoutMiddleware([ThrottleRequests::class]);
 
 Route::get('/status', function () {
     return response()->json(['status' => 'API is running']);
@@ -38,9 +40,11 @@ Route::options('/{any}', function () {
     ]);
 })->where('any', '.*');
 
-Route::apiResource('v1/stakeholders', StakeholderController::class);
-Route::apiResource('v1/programs', ProgramController::class);
-Route::apiResource('v1/activities', ActivityController::class);
-Route::apiResource('v1/tasks', TaskController::class);
-Route::get('v1/task-statuses', [\App\Http\Controllers\Api\V1\TaskStatusController::class, 'index']);
-Route::post('v1/tasks/{task}/move', [TaskController::class, 'move']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('v1/stakeholders', StakeholderController::class);
+    Route::apiResource('v1/programs', ProgramController::class);
+    Route::apiResource('v1/activities', ActivityController::class);
+    Route::apiResource('v1/tasks', TaskController::class);
+    Route::get('v1/task-statuses', [\App\Http\Controllers\Api\V1\TaskStatusController::class, 'index']);
+    Route::post('v1/tasks/{task}/move', [TaskController::class, 'move']);
+});
