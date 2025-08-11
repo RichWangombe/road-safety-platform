@@ -47,4 +47,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('v1/tasks', TaskController::class);
     Route::get('v1/task-statuses', [\App\Http\Controllers\Api\V1\TaskStatusController::class, 'index']);
     Route::post('v1/tasks/{task}/move', [TaskController::class, 'move']);
+    Route::get('v1/tasks/summary', [TaskController::class, 'summary']);
 });

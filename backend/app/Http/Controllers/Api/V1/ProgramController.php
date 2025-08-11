@@ -8,8 +8,12 @@ use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Program::all();
+        $user = $request->user();
+        return Program::with('manager')
+            ->allowed($user)
+            ->orderBy('name')
+            ->get();
     }
 }

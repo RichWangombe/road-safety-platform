@@ -41,10 +41,16 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        if ($user->role === 'team_member') {
-            return $task->assignee_id === $user->id;
+        // Global roles
+        if (in_array($user->role, ['admin', 'program_manager'])) {
+            return true;
         }
-        return true; // higher roles allowed for now
+        // Region-scoped roles: only within their region
+        if (in_array($user->role, ['regional_manager','supervisor','team_lead'])) {
+            return $task->activity?->program?->region === $user->region?->name;
+        }
+        // Team members: only their own tasks
+        return $task->assignee_id === $user->id;
     }
 
     /**
