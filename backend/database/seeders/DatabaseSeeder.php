@@ -39,6 +39,8 @@ class DatabaseSeeder extends Seeder
             TaskStatusSeeder::class,
             StakeholderSeeder::class,
             ProgramSeeder::class,
+            ActivitySeeder::class,
+            TaskSeeder::class,
         ]);
     }
 }

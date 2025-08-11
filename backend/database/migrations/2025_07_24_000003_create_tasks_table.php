@@ -15,11 +15,17 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('activity_id')->constrained('activities')->onDelete('cascade');
-            $table->foreignId('assignee_id')->constrained('users');
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->foreignId('activity_id')->constrained('activities')->onDelete('cascade');
+                $table->foreignId('assignee_id')->constrained('users');
+            } else {
+                $table->unsignedBigInteger('activity_id');
+                $table->unsignedBigInteger('assignee_id');
+            }
             $table->string('title');
             $table->string('priority'); // e.g., 'high', 'medium', 'low'
-            $table->string('status'); // e.g., 'todo', 'in_progress', 'done'
+            $table->unsignedBigInteger('status_id')->after('priority');
+            $table->unsignedInteger('position')->default(0)->after('status_id');
             $table->date('due_date');
             $table->timestamps();
         });

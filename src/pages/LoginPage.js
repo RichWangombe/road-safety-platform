@@ -32,7 +32,8 @@ const LoginPage = () => {
         setError("Invalid username or password");
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", err);
+      setError(err.message || "An unexpected error occurred. Please try again.");
     }
   };
 

@@ -496,8 +496,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
       </Grid>
-      <button onClick={handleTestAPI}>Test API Connection</button>
-      <pre>{JSON.stringify(stakeholders, null, 2)}</pre>
+
     </Box>
   );
 }

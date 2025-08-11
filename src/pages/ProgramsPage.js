@@ -431,10 +431,10 @@ export default function ProgramsPage() {
                         <Avatar
                           sx={{ width: 32, height: 32, fontSize: "0.8rem" }}
                         >
-                          {program.manager.name.charAt(0)}
+                          {program.manager?.name?.charAt(0) ?? "?"}
                         </Avatar>
                         <Typography variant="body2">
-                          {program.manager.name}
+                          {program.manager?.name ?? "Unknown"}
                         </Typography>
                       </Box>
                     </TableCell>
