@@ -13,6 +13,9 @@ class ActivitySeeder extends Seeder
      */
     public function run()
     {
-        //
+        // Seed sample activities
+        \App\Models\Activity::factory()
+            ->count(5)
+            ->create();
     }
 }

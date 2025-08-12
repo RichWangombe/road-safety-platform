@@ -13,6 +13,12 @@ class TaskSeeder extends Seeder
      */
     public function run()
     {
-        //
+        // Seed tasks for existing activities
+        $activities = \App\Models\Activity::all();
+        foreach ($activities as $activity) {
+            \App\Models\Task::factory()
+                ->count(5)
+                ->create(['activity_id' => $activity->id]);
+        }
     }
 }

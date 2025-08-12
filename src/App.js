@@ -15,9 +15,11 @@ import TeamMembersPage from "./pages/TeamMembersPage";
 import RoadSafetyActorsPage from "./pages/RoadSafetyActorsPage";
 import ReportingPage from "./pages/ReportingPage";
 import ResourceCentrePage from "./pages/ResourceCentrePage";
+import TaskBoard from "./pages/TaskBoard";
 import StakeholdersPage from "./pages/StakeholdersPage";
 import SettingsPage from "./pages/SettingsPage";
 import HelpPage from "./pages/HelpPage";
+import ApprovalsPage from "./pages/ApprovalsPage";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
         <Route path="team-members" element={<TeamMembersPage />} />
         <Route path="road-safety-actors" element={<RoadSafetyActorsPage />} />
         <Route path="reporting" element={<ReportingPage />} />
+        <Route path="board" element={<TaskBoard />} />
+        <Route path="approvals" element={<ApprovalsPage />} />
         <Route path="resource-centre" element={<ResourceCentrePage />} />
         <Route path="stakeholders" element={<StakeholdersPage />} />
         <Route path="settings" element={<SettingsPage />} />

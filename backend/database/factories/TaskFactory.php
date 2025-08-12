@@ -18,7 +18,8 @@ class TaskFactory extends Factory
             'assignee_id' => \App\Models\User::factory(),
             'title' => $this->faker->sentence(6),
             'priority' => $this->faker->randomElement(['high', 'medium', 'low']),
-            'status' => $this->faker->randomElement(['todo', 'in_progress', 'done']),
+            'status_id' => \App\Models\TaskStatus::inRandomOrder()->first()->id ?? \App\Models\TaskStatus::factory(),
+            'position' => $this->faker->numberBetween(1, 10),
             'due_date' => $this->faker->dateTimeBetween('now', '+2 months'),
         ];
     }
