@@ -52,6 +52,33 @@ The `src` directory is organized as follows:
    npm install
    ```
 
+### Backend Setup
+
+Choose **ONE** of these options to run the Laravel API locally:
+
+#### Option 1: Laragon (Recommended for Windows)
+1. [Download Laragon](https://laragon.org/download/) (Full version)
+2. Install → drag your `backend` folder into Laragon
+3. Click "Start All" → access API at `http://road-safety-platform.test/api`
+
+#### Option 2: Native PHP
+1. Ensure PHP 8.2+ is installed and in PATH
+2. From `backend/` directory:
+   ```bash
+   # First-time setup
+   copy .env.example .env
+   php artisan key:generate
+   
+   # Start server
+   php artisan serve --port=8000
+   ```
+3. React app will auto-connect to `http://localhost:8000/api`
+
+#### Testing the API
+```bash
+curl http://localhost:8000/api/test
+```
+
 ### Running the Application
 
 To start the development server:

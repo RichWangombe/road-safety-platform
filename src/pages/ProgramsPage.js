@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import ProgramForm from '../components/ProgramForm';
-import ConfirmationDialog from '../components/ConfirmationDialog';
+import React, { useState, useMemo, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import ProgramForm from "../components/ProgramForm";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 import {
   Box,
   Typography,
@@ -27,8 +27,8 @@ import {
   Tooltip,
   Card,
   CardContent,
-  Grid
-} from '@mui/material';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   Search,
   Add,
@@ -37,113 +37,136 @@ import {
   Delete,
   Visibility,
   FilterList,
-  GetApp
-} from '@mui/icons-material';
+  GetApp,
+} from "@mui/icons-material";
+import { fetchPrograms } from "../api/apiService";
 
 // Mock data for programs
 export const programsData = [
   {
     id: 1,
-    name: 'Highway Safety Initiative',
-    description: 'Comprehensive highway safety improvement program',
-    status: 'active',
-    priority: 'high',
+    name: "Highway Safety Initiative",
+    description: "Comprehensive highway safety improvement program",
+    status: "active",
+    priority: "high",
     progress: 75,
-    startDate: '2025-01-15',
-    endDate: '2025-12-31',
+    startDate: "2025-01-15",
+    endDate: "2025-12-31",
     budget: 2500000,
-    manager: { name: 'John Smith', avatar: null },
+    manager: { name: "John Smith", avatar: null },
     tasks: 45,
     completedTasks: 34,
-    region: 'North',
+    region: "North",
   },
   {
     id: 2,
-    name: 'Urban Traffic Management',
-    description: 'Smart traffic light and congestion management system',
-    status: 'active',
-    priority: 'medium',
+    name: "Urban Traffic Management",
+    description: "Smart traffic light and congestion management system",
+    status: "active",
+    priority: "medium",
     progress: 60,
-    startDate: '2025-02-01',
-    endDate: '2025-11-30',
+    startDate: "2025-02-01",
+    endDate: "2025-11-30",
     budget: 1800000,
-    manager: { name: 'Sarah Johnson', avatar: null },
+    manager: { name: "Sarah Johnson", avatar: null },
     tasks: 32,
     completedTasks: 19,
-    region: 'Central',
+    region: "Central",
   },
   {
     id: 3,
-    name: 'Rural Road Maintenance',
-    description: 'Systematic maintenance of rural road infrastructure',
-    status: 'planning',
-    priority: 'low',
+    name: "Rural Road Maintenance",
+    description: "Systematic maintenance of rural road infrastructure",
+    status: "planning",
+    priority: "low",
     progress: 15,
-    startDate: '2025-03-01',
-    endDate: '2025-10-31',
+    startDate: "2025-03-01",
+    endDate: "2025-10-31",
     budget: 950000,
-    manager: { name: 'Mike Davis', avatar: null },
+    manager: { name: "Mike Davis", avatar: null },
     tasks: 28,
     completedTasks: 4,
-    region: 'South',
+    region: "South",
   },
   {
     id: 4,
-    name: 'Driver Education Campaign',
-    description: 'Public awareness and driver education initiative',
-    status: 'completed',
-    priority: 'medium',
+    name: "Driver Education Campaign",
+    description: "Public awareness and driver education initiative",
+    status: "completed",
+    priority: "medium",
     progress: 100,
-    startDate: '2024-06-01',
-    endDate: '2024-12-31',
+    startDate: "2024-06-01",
+    endDate: "2024-12-31",
     budget: 450000,
-    manager: { name: 'Lisa Chen', avatar: null },
+    manager: { name: "Lisa Chen", avatar: null },
     tasks: 18,
     completedTasks: 18,
-    region: 'All',
+    region: "All",
   },
 ];
 
 export const getStatusColor = (status) => {
   switch (status) {
-    case 'active': return { bg: '#e8f5e8', color: '#2e7d32' };
-    case 'planning': return { bg: '#fff3e0', color: '#f57c00' };
-    case 'completed': return { bg: '#e3f2fd', color: '#1976d2' };
-    case 'on-hold': return { bg: '#fce4ec', color: '#c2185b' };
-    default: return { bg: '#f5f5f5', color: '#616161' };
+    case "active":
+      return { bg: "#e8f5e8", color: "#2e7d32" };
+    case "planning":
+      return { bg: "#fff3e0", color: "#f57c00" };
+    case "completed":
+      return { bg: "#e3f2fd", color: "#1976d2" };
+    case "on-hold":
+      return { bg: "#fce4ec", color: "#c2185b" };
+    default:
+      return { bg: "#f5f5f5", color: "#616161" };
   }
 };
 
 export const getPriorityColor = (priority) => {
   switch (priority) {
-    case 'high': return { bg: '#ffebee', color: '#d32f2f' };
-    case 'medium': return { bg: '#fff3e0', color: '#f57c00' };
-    case 'low': return { bg: '#e8f5e8', color: '#388e3c' };
-    default: return { bg: '#f5f5f5', color: '#616161' };
+    case "high":
+      return { bg: "#ffebee", color: "#d32f2f" };
+    case "medium":
+      return { bg: "#fff3e0", color: "#f57c00" };
+    case "low":
+      return { bg: "#e8f5e8", color: "#388e3c" };
+    default:
+      return { bg: "#f5f5f5", color: "#616161" };
   }
 };
 
 export default function ProgramsPage() {
   const { user } = useAuth();
-  const canManagePrograms = user?.role === 'Program Manager';
+  const canManagePrograms = user?.role === "Program Manager";
   const navigate = useNavigate();
-  const [programs, setPrograms] = useState(programsData);
+  const [programs, setPrograms] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [programToDelete, setProgramToDelete] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [orderBy, setOrderBy] = useState('name');
-  const [order, setOrder] = useState('asc');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [orderBy, setOrderBy] = useState("name");
+  const [order, setOrder] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
 
+  useEffect(() => {
+    const loadPrograms = async () => {
+      try {
+        const data = await fetchPrograms();
+        setPrograms(data);
+      } catch (error) {
+        console.error("Failed to fetch programs:", error);
+      }
+    };
+
+    loadPrograms();
+  }, []);
+
   const handleSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
@@ -160,10 +183,19 @@ export default function ProgramsPage() {
   const handleFormSave = (programData) => {
     if (editingProgram) {
       // Update existing program
-      setPrograms(programs.map(p => p.id === programData.id ? programData : p));
+      setPrograms(
+        programs.map((p) => (p.id === programData.id ? programData : p)),
+      );
     } else {
       // Create new program
-      const newProgram = { ...programData, id: Date.now(), progress: 0, tasks: 0, completedTasks: 0, manager: { name: 'Unassigned' } };
+      const newProgram = {
+        ...programData,
+        id: Date.now(),
+        progress: 0,
+        tasks: 0,
+        completedTasks: 0,
+        manager: { name: "Unassigned" },
+      };
       setPrograms([...programs, newProgram]);
     }
     setEditingProgram(null);
@@ -171,19 +203,20 @@ export default function ProgramsPage() {
   };
 
   const handleDeleteConfirm = () => {
-    setPrograms(programs.filter(p => p.id !== programToDelete.id));
+    setPrograms(programs.filter((p) => p.id !== programToDelete.id));
     setIsConfirmOpen(false);
     setProgramToDelete(null);
   };
 
-  const filteredPrograms = programs.filter(program =>
-    program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    program.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    program.manager.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPrograms = programs.filter(
+    (program) =>
+      program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      program.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      program.manager.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const sortedPrograms = filteredPrograms.sort((a, b) => {
-    if (order === 'asc') {
+    if (order === "asc") {
       return a[orderBy] < b[orderBy] ? -1 : 1;
     }
     return a[orderBy] > b[orderBy] ? -1 : 1;
@@ -191,13 +224,20 @@ export default function ProgramsPage() {
 
   const paginatedPrograms = sortedPrograms.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" fontWeight={600}>
           Programs Management
         </Typography>
@@ -217,7 +257,7 @@ export default function ProgramsPage() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom variant="body2">
@@ -229,38 +269,46 @@ export default function ProgramsPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom variant="body2">
                 Active Programs
               </Typography>
               <Typography variant="h4" component="div">
-                {programs.filter(p => p.status === 'active').length}
+                {programs.filter((p) => p.status === "active").length}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom variant="body2">
                 Total Budget
               </Typography>
               <Typography variant="h4" component="div">
-                ${(programs.reduce((sum, p) => sum + p.budget, 0) / 1000000).toFixed(1)}M
+                $
+                {(
+                  programs.reduce((sum, p) => sum + p.budget, 0) / 1000000
+                ).toFixed(1)}
+                M
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom variant="body2">
                 Avg Progress
               </Typography>
               <Typography variant="h4" component="div">
-                {Math.round(programs.reduce((sum, p) => sum + p.progress, 0) / programs.length)}%
+                {Math.round(
+                  programs.reduce((sum, p) => sum + p.progress, 0) /
+                    programs.length,
+                )}
+                %
               </Typography>
             </CardContent>
           </Card>
@@ -268,7 +316,7 @@ export default function ProgramsPage() {
       </Grid>
 
       {/* Search and Filters */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <TextField
           placeholder="Search programs..."
           value={searchTerm}
@@ -299,16 +347,16 @@ export default function ProgramsPage() {
       </Box>
 
       {/* Data Table */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>
                   <TableSortLabel
-                    active={orderBy === 'name'}
-                    direction={orderBy === 'name' ? order : 'asc'}
-                    onClick={() => handleSort('name')}
+                    active={orderBy === "name"}
+                    direction={orderBy === "name" ? order : "asc"}
+                    onClick={() => handleSort("name")}
                   >
                     Program Name
                   </TableSortLabel>
@@ -327,7 +375,7 @@ export default function ProgramsPage() {
               {paginatedPrograms.map((program) => {
                 const statusColors = getStatusColor(program.status);
                 const priorityColors = getPriorityColor(program.priority);
-                
+
                 return (
                   <TableRow key={program.id} hover>
                     <TableCell>
@@ -347,7 +395,7 @@ export default function ProgramsPage() {
                         sx={{
                           backgroundColor: statusColors.bg,
                           color: statusColors.color,
-                          textTransform: 'capitalize'
+                          textTransform: "capitalize",
                         }}
                       />
                     </TableCell>
@@ -358,26 +406,36 @@ export default function ProgramsPage() {
                         sx={{
                           backgroundColor: priorityColors.bg,
                           color: priorityColors.color,
-                          textTransform: 'capitalize'
+                          textTransform: "capitalize",
                         }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <LinearProgress
                           variant="determinate"
                           value={program.progress}
                           sx={{ width: 60, height: 6, borderRadius: 3 }}
                         />
-                        <Typography variant="body2">{program.progress}%</Typography>
+                        <Typography variant="body2">
+                          {program.progress}%
+                        </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem' }}>
-                          {program.manager.name.charAt(0)}
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Avatar
+                          sx={{ width: 32, height: 32, fontSize: "0.8rem" }}
+                        >
+                          {program.manager?.name?.charAt(0) ?? "?"}
                         </Avatar>
-                        <Typography variant="body2">{program.manager.name}</Typography>
+                        <Typography variant="body2">
+                          {program.manager?.name ?? "Unknown"}
+                        </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -427,34 +485,42 @@ export default function ProgramsPage() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={() => {
-          navigate(`/program/${selectedProgram.id}`);
-          handleMenuClose();
-        }}>
+        <MenuItem
+          onClick={() => {
+            navigate(`/program/${selectedProgram.id}`);
+            handleMenuClose();
+          }}
+        >
           <Visibility fontSize="small" sx={{ mr: 1 }} />
           View Details
         </MenuItem>
         {canManagePrograms && [
-          <MenuItem key="edit" onClick={() => {
-            setEditingProgram(selectedProgram);
-            setIsFormOpen(true);
-            handleMenuClose();
-          }}>
+          <MenuItem
+            key="edit"
+            onClick={() => {
+              setEditingProgram(selectedProgram);
+              setIsFormOpen(true);
+              handleMenuClose();
+            }}
+          >
             <Edit sx={{ mr: 1 }} />
             Edit
           </MenuItem>,
-          <MenuItem key="delete" onClick={() => {
-            setProgramToDelete(selectedProgram);
-            setIsConfirmOpen(true);
-            handleMenuClose();
-          }}>
+          <MenuItem
+            key="delete"
+            onClick={() => {
+              setProgramToDelete(selectedProgram);
+              setIsConfirmOpen(true);
+              handleMenuClose();
+            }}
+          >
             <Delete sx={{ mr: 1 }} />
             Delete
-          </MenuItem>
+          </MenuItem>,
         ]}
       </Menu>
 
-      <ProgramForm 
+      <ProgramForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSave={handleFormSave}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,8 +6,8 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid
-} from '@mui/material';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 const ProgramForm = ({ open, onClose, onSave, program }) => {
   // We will use this state to manage the form fields
@@ -20,7 +20,7 @@ const ProgramForm = ({ open, onClose, onSave, program }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
@@ -30,66 +30,68 @@ const ProgramForm = ({ open, onClose, onSave, program }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{program ? 'Edit Program' : 'Create New Program'}</DialogTitle>
+      <DialogTitle>
+        {program ? "Edit Program" : "Create New Program"}
+      </DialogTitle>
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               name="name"
               label="Program Name"
-              value={formData.name || ''}
+              value={formData.name || ""}
               onChange={handleChange}
               fullWidth
               required
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               name="description"
               label="Description"
-              value={formData.description || ''}
+              value={formData.description || ""}
               onChange={handleChange}
               fullWidth
               multiline
               rows={4}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="budget"
               label="Budget"
               type="number"
-              value={formData.budget || ''}
+              value={formData.budget || ""}
               onChange={handleChange}
               fullWidth
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="region"
               label="Region"
-              value={formData.region || ''}
+              value={formData.region || ""}
               onChange={handleChange}
               fullWidth
             />
           </Grid>
-           <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="startDate"
               label="Start Date"
               type="date"
-              value={formData.startDate || ''}
+              value={formData.startDate || ""}
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField
               name="endDate"
               label="End Date"
               type="date"
-              value={formData.endDate || ''}
+              value={formData.endDate || ""}
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -99,7 +101,9 @@ const ProgramForm = ({ open, onClose, onSave, program }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">Save</Button>
+        <Button onClick={handleSave} variant="contained">
+          Save
+        </Button>
       </DialogActions>
     </Dialog>
   );

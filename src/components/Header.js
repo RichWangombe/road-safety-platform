@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { styled } from '@mui/material/styles';
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { styled } from "@mui/material/styles";
 import {
   AppBar,
   Toolbar,
@@ -11,27 +11,27 @@ import {
   Menu,
   MenuItem,
   Box,
-  Divider
-} from '@mui/material';
-import { 
-  Menu as MenuIcon, 
-  Search as SearchIcon, 
-  AccountCircle as AccountCircleIcon
-} from '@mui/icons-material';
-import { useLocation } from 'react-router-dom';
-import { menuItems } from './MainLayout'; // Import menuItems to get page titles
+  Divider,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Search as SearchIcon,
+  AccountCircle as AccountCircleIcon,
+} from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
+import { menuItems } from "./menuItems"; // Import menuItems to get page titles
 
 const StyledAppBar = styled(AppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
+  shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
+  transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
     width: `calc(100% - 240px)`,
     marginLeft: `240px`,
-    transition: theme.transitions.create(['margin', 'width'], {
+    transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
@@ -40,42 +40,50 @@ const StyledAppBar = styled(AppBar, {
 
 const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
   const { user, logout } = useAuth();
+  const isAuthenticated = !!user;
   const [anchorEl, setAnchorEl] = useState(null);
-  const location = useLocation();
+  const location = useLocation(); // Always available within Router
+
   const openMenu = Boolean(anchorEl);
 
-  // Find the current page title from menuItems
-  const currentPage = menuItems.find(item => item.path === location.pathname);
+  // Determine page title
+  const currentPage = location
+    ? menuItems?.find((item) => location.pathname.startsWith(item.path))
+    : null;
+  let pageTitle = "Road Safety Management";
+  if (currentPage) {
+    pageTitle = currentPage.text;
+  } else if (location && location.pathname !== "/") {
+    const segment = location.pathname.split("/")[1] || "";
+    pageTitle = segment.replace(/-/g, " ");
+    pageTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
+  }
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
-
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const isMenuOpen = Boolean(anchorEl);
-
-
   return (
     <>
-      <StyledAppBar position="fixed" open={open} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <StyledAppBar
+        position="fixed"
+        open={open}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            sx={{ mr: 2, ...(open && { display: "none" }) }}
           >
             <MenuIcon />
           </IconButton>
-          
+
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {currentPage ? currentPage.text : 'Road Safety Management'}
+            {pageTitle}
           </Typography>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <TextField
               size="small"
               placeholder="Search..."
@@ -89,29 +97,31 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
               }}
               sx={{ minWidth: 200 }}
             />
-            
+
             <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenuOpen}
-                color="inherit"
-              >
-                <AccountCircleIcon />
-              </IconButton>
+              {isAuthenticated && (
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenuOpen}
+                  color="inherit"
+                >
+                  <AccountCircleIcon data-testid="AccountCircleIcon" />
+                </IconButton>
+              )}
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
                 anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 keepMounted
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 open={openMenu}
                 onClose={handleMenuClose}
@@ -125,7 +135,6 @@ const Header = ({ onSearchChange, open, handleDrawerOpen }) => {
           </Box>
         </Toolbar>
       </StyledAppBar>
-
     </>
   );
 };
