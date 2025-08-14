@@ -113,5 +113,98 @@ class ProgramSeeder extends Seeder
                 'due_date' => now()->subDay(),
             ]
         );
+
+        // Extra Nairobi programs and activities for richer demos
+        $extraPrograms = [
+            [
+                'name' => 'Nairobi School Zone Safety',
+                'description' => 'Improve safety around school zones across Nairobi.',
+                'priority' => 'medium',
+                'activities' => [
+                    ['name' => 'Zebra Crossing Refresh', 'description' => 'Repaint crossings and update signage near schools.'],
+                    ['name' => 'School Marshals Training', 'description' => 'Training sessions for crossing marshals.'],
+                ],
+            ],
+            [
+                'name' => 'Nairobi Public Transport Safety',
+                'description' => 'PSV safety improvements and compliance initiatives.',
+                'priority' => 'high',
+                'activities' => [
+                    ['name' => 'PSV Driver Workshops', 'description' => 'Road safety workshops for PSV drivers.'],
+                    ['name' => 'Matatu Safety Inspections', 'description' => 'Periodic inspections for safety compliance.'],
+                ],
+            ],
+            [
+                'name' => 'Nairobi Infrastructure Upgrades',
+                'description' => 'Upgrades to traffic infrastructure across hotspots.',
+                'priority' => 'medium',
+                'activities' => [
+                    ['name' => 'Traffic Light Maintenance', 'description' => 'Repair and maintain non-functional traffic lights.'],
+                    ['name' => 'Speed Bump Installation', 'description' => 'Install speed bumps in high-risk zones.'],
+                ],
+            ],
+        ];
+
+        foreach ($extraPrograms as $p) {
+            $prog = \App\Models\Program::updateOrCreate(
+                ['name' => $p['name']],
+                [
+                    'description' => $p['description'],
+                    'status' => 'active',
+                    'priority' => $p['priority'],
+                    'start_date' => now()->subWeeks(2),
+                    'end_date' => now()->addMonths(2),
+                    'budget' => 500000,
+                    'manager_id' => $pm?->id,
+                    'region' => 'Nairobi',
+                ]
+            );
+
+            foreach ($p['activities'] as $a) {
+                $act = \App\Models\Activity::updateOrCreate(
+                    ['program_id' => $prog->id, 'name' => $a['name']],
+                    [
+                        'description' => $a['description'],
+                        'status' => 'in_progress',
+                        'start_date' => now()->subDays(rand(1,14)),
+                        'end_date' => now()->addWeeks(rand(2,8)),
+                    ]
+                );
+
+                // Tasks across statuses for better column coverage on Task Board
+                \App\Models\Task::updateOrCreate(
+                    ['activity_id' => $act->id, 'title' => $a['name'].' - Kickoff'],
+                    [
+                        'assignee_id' => $assignee?->id,
+                        'priority' => 'medium',
+                        'status_id' => $statusDraft ?: $statusPendingTL,
+                        'position' => 1,
+                        'due_date' => now()->addDays(2),
+                    ]
+                );
+
+                \App\Models\Task::updateOrCreate(
+                    ['activity_id' => $act->id, 'title' => $a['name'].' - Field Work'],
+                    [
+                        'assignee_id' => $assignee?->id,
+                        'priority' => 'high',
+                        'status_id' => $statusPendingTL ?: $statusPendingSup,
+                        'position' => 2,
+                        'due_date' => now()->addDays(5),
+                    ]
+                );
+
+                \App\Models\Task::updateOrCreate(
+                    ['activity_id' => $act->id, 'title' => $a['name'].' - Report Compilation'],
+                    [
+                        'assignee_id' => $assignee?->id,
+                        'priority' => 'low',
+                        'status_id' => $statusPendingSup ?: $statusPendingReg,
+                        'position' => 3,
+                        'due_date' => now()->addDays(7),
+                    ]
+                );
+            }
+        }
     }
 }
